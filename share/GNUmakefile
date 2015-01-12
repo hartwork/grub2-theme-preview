@@ -83,7 +83,7 @@ grub-installed: disk-device-set-up boot-partition-mounted
 			"$${DISK_DEVICE}"
 
 grub-config-placed: grub-installed boot-partition-mounted
-	$(SUDO) $(CP) -v $(GRUB_CFG_TO_APPLY) $(BOOT_MOUNT_POINT)/grub/
+	$(SUDO) $(CP) -v $(GRUB_CFG_TO_APPLY) $(BOOT_MOUNT_POINT)/grub/grub.cfg
 
 theme-copied: boot-partition-mounted
 	[[ -d "$(BOOT_MOUNT_POINT)/grub/themes/DEMO" ]] \
