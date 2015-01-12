@@ -1,0 +1,6 @@
+#! /usr/bin/env python
+# Copyright (C) 2015 Sebastian Pipping <sebastian@pipping.org>
+# Licensed under GPL v2 or later
+
+from grub2_theme_preview.cli import main
+main()
