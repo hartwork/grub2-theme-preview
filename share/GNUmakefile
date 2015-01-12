@@ -4,7 +4,9 @@
 DISK = grub2_theme_demo.img
 GRUB_CFG_TO_APPLY = grub.cfg
 BOOT_MOUNT_POINT = boot
+FULL_THEME = 1
 THEME_DIR = /usr/share/grub/themes/starfield/
+BACKGROUND_IMAGE = /usr/share/grub/themes/starfield/starfield.png
 
 BLKID = blkid
 CP = cp
@@ -86,11 +88,16 @@ grub-config-placed: grub-installed boot-partition-mounted
 	$(SUDO) $(CP) -v $(GRUB_CFG_TO_APPLY) $(BOOT_MOUNT_POINT)/grub/grub.cfg
 
 theme-copied: boot-partition-mounted
+ifeq ($(FULL_THEME),1)
 	[[ -d "$(BOOT_MOUNT_POINT)/grub/themes/DEMO" ]] \
 		|| { \
 			$(SUDO) $(MKDIR) "$(BOOT_MOUNT_POINT)/grub/themes/DEMO" \
 			&& $(SUDO) $(CP) -Rv $(THEME_DIR)/* "$(BOOT_MOUNT_POINT)/grub/themes/DEMO/" \
 		; }
+else
+	[[ -d "$(BOOT_MOUNT_POINT)/grub/themes/DEMO.png" ]] \
+		|| $(SUDO) $(CP) -v "$(BACKGROUND_IMAGE)" "$(BOOT_MOUNT_POINT)/grub/themes/DEMO.png"
+endif
 
 disk-synced: grub-config-placed theme-copied
 	$(SYNC)

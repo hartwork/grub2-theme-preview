@@ -67,16 +67,31 @@ def main():
     tmp_folder = os.path.join(abs_workdir_root, theme_id)
 
 
+    cmd_start = [
+        'make',
+        '-f', abs_makefile,
+        '-C', tmp_folder
+        ]
+
     if options.image:
-        raise NotImplementedError()
+        cmd_middle = [
+            'FULL_THEME=0',
+            'BACKGROUND_IMAGE=%s' % normalized_source,
+            ]
     else:
-        created = _mkdir_if_missing(tmp_folder)
-        cmd = ['make',
-            '-f', abs_makefile,
-            '-C', tmp_folder,
+        cmd_middle = [
+            'FULL_THEME=1',
             'THEME_DIR=%s' % normalized_source,
+            ]
+
+    cmd_end = [
             'BOOT_MOUNT_POINT=%s' % os.path.join(tmp_folder, 'boot'),
             'GRUB_CFG_TO_APPLY=%s' % abs_grub_cfg,
-            'run']
-        print('# %s' % ' '.join(cmd))
-        subprocess.call(cmd)
+            'run',
+        ]
+
+    created = _mkdir_if_missing(tmp_folder)
+    cmd = cmd_start + cmd_middle + cmd_end
+
+    print('# %s' % ' '.join(cmd))
+    subprocess.call(cmd)
