@@ -4,6 +4,7 @@
 DISK = grub2_theme_demo.img
 GRUB_CFG_TO_APPLY = grub.cfg
 BOOT_MOUNT_POINT = boot
+THEME_DIR = /usr/share/grub/themes/starfield/
 
 BLKID = blkid
 CP = cp
@@ -84,7 +85,14 @@ grub-installed: disk-device-set-up boot-partition-mounted
 grub-config-placed: grub-installed boot-partition-mounted
 	$(SUDO) $(CP) -v $(GRUB_CFG_TO_APPLY) $(BOOT_MOUNT_POINT)/grub/
 
-disk-synced: grub-config-placed
+theme-copied: boot-partition-mounted
+	[[ -d "$(BOOT_MOUNT_POINT)/grub/themes/DEMO" ]] \
+		|| { \
+			$(SUDO) $(MKDIR) "$(BOOT_MOUNT_POINT)/grub/themes/DEMO" \
+			&& $(SUDO) $(CP) -Rv $(THEME_DIR)/* "$(BOOT_MOUNT_POINT)/grub/themes/DEMO/" \
+		; }
+
+disk-synced: grub-config-placed theme-copied
 	$(SYNC)
 
 run: disk-synced
