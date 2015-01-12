@@ -85,14 +85,14 @@ grub-installed: disk-device-set-up boot-partition-mounted
 			"$${DISK_DEVICE}"
 
 grub-config-placed: grub-installed boot-partition-mounted
-	$(SUDO) $(CP) -v $(GRUB_CFG_TO_APPLY) $(BOOT_MOUNT_POINT)/grub/grub.cfg
+	$(SUDO) $(CP) -v "$(GRUB_CFG_TO_APPLY)" "$(BOOT_MOUNT_POINT)/grub/grub.cfg"
 
 theme-copied: boot-partition-mounted
 ifeq ($(FULL_THEME),1)
 	[[ -d "$(BOOT_MOUNT_POINT)/grub/themes/DEMO" ]] \
 		|| { \
 			$(SUDO) $(MKDIR) "$(BOOT_MOUNT_POINT)/grub/themes/DEMO" \
-			&& $(SUDO) $(CP) -Rv $(THEME_DIR)/* "$(BOOT_MOUNT_POINT)/grub/themes/DEMO/" \
+			&& $(SUDO) $(CP) -Rv "$(THEME_DIR)"/* "$(BOOT_MOUNT_POINT)/grub/themes/DEMO/" \
 		; }
 else
 	[[ -d "$(BOOT_MOUNT_POINT)/grub/themes/DEMO.png" ]] \
