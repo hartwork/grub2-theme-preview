@@ -103,7 +103,7 @@ disk-synced: grub-config-placed theme-copied
 	$(SYNC)
 
 run: disk-synced
-	$(SUDO) $(KVM) -hda "$(DISK)"
+	$(KVM) -hda "$(DISK)"
 
 
 .PHONY: TODO
