@@ -4,11 +4,11 @@
 from __future__ import print_function
 
 import errno
-import hashlib
 import inspect
 import os
 from argparse import ArgumentParser
 import subprocess
+import tempfile
 from .version import VERSION_STR
 
 
@@ -18,12 +18,6 @@ def _get_abs_self_dir():
 
 def _is_run_from_git():
     return os.path.exists(os.path.join(_get_abs_self_dir(), '..', '.git'))
-
-
-def _sha256(text):
-    h = hashlib.sha256()
-    h.update(text)
-    return h.hexdigest()
 
 
 def _mkdir_if_missing(path):
@@ -36,23 +30,25 @@ def _mkdir_if_missing(path):
         raise
 
 
+def _run(cmd):
+    print('# %s' % ' '.join(cmd))
+    subprocess.call(cmd)
+
+
 def main():
     parser = ArgumentParser()
     parser.add_argument('--image', action='store_true', help='Preview a background image rather than a whole theme')
     parser.add_argument('--grub-cfg', metavar='PATH', help='Path grub.cfg file to apply')
+    parser.add_argument('--grub2-mkrescue', default='grub2-mkrescue', metavar='COMMAND', help='grub2-mkrescue command (default: %(default)s)')
+    parser.add_argument('--qemu', default='qemu-system-x86_64', metavar='COMMAND', help='kvm/qemu command (default: %(default)s)')
     parser.add_argument('source', metavar='PATH', help='Path of theme directory (or image file) to preview')
     parser.add_argument('--version', action='version', version='%(prog)s ' + VERSION_STR)
     options = parser.parse_args()
 
-
     if _is_run_from_git():
         abs_share_root = os.path.normpath(os.path.join(_get_abs_self_dir(), '..', 'share'))
-        abs_workdir_root = os.path.normpath(os.path.join(_get_abs_self_dir(), '..'))
     else:
         abs_share_root = '/usr/share/grub2-theme-preview/'
-        abs_workdir_root = '/var/tmp/grub2-theme-preview/'
-
-    abs_makefile = os.path.join(abs_share_root, 'GNUmakefile')
 
     if options.image:
         if options.grub_cfg:
@@ -63,35 +59,38 @@ def main():
         abs_grub_cfg = os.path.join(abs_share_root, 'full_theme.cfg')
 
     normalized_source = os.path.normpath(os.path.abspath(options.source))
-    theme_id = _sha256(normalized_source)
-    tmp_folder = os.path.join(abs_workdir_root, theme_id)
 
+    abs_tmp_folder = tempfile.mkdtemp()
+    try:
+        abs_tmp_file = os.path.join(abs_tmp_folder, 'grub2_theme_demo.img')
 
-    cmd_start = [
-        'make',
-        '-f', abs_makefile,
-        '-C', tmp_folder
-        ]
-
-    if options.image:
-        cmd_middle = [
-            'FULL_THEME=0',
-            'BACKGROUND_IMAGE=%s' % normalized_source,
-            ]
-    else:
-        cmd_middle = [
-            'FULL_THEME=1',
-            'THEME_DIR=%s' % normalized_source,
+        assemble_cmd = [
+            options.grub2_mkrescue,
+            '--output', abs_tmp_file,
+            'boot/grub/grub.cfg=%s' % abs_grub_cfg,
             ]
 
-    cmd_end = [
-            'BOOT_MOUNT_POINT=%s' % os.path.join(tmp_folder, 'boot'),
-            'GRUB_CFG_TO_APPLY=%s' % abs_grub_cfg,
-            'run',
-        ]
+        if options.image:
+            assemble_cmd += [
+                'boot/grub/themes/DEMO.png=%s' % normalized_source,
+                ]
+        else:
+            assemble_cmd += [
+                'boot/grub/themes/DEMO/=%s' % normalized_source,
+                ]
 
-    created = _mkdir_if_missing(tmp_folder)
-    cmd = cmd_start + cmd_middle + cmd_end
+        run_command = [
+            options.qemu,
+            '-hda', abs_tmp_file,
+            ]
 
-    print('# %s' % ' '.join(cmd))
-    subprocess.call(cmd)
+        _run(assemble_cmd)
+        _run(run_command)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        try:
+            os.remove(abs_tmp_file)
+            os.rmdir(abs_tmp_folder)
+        except OSError:
+            pass
