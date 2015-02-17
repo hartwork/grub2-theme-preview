@@ -30,9 +30,17 @@ def _mkdir_if_missing(path):
         raise
 
 
-def _run(cmd):
-    print('# %s' % ' '.join(cmd))
-    subprocess.call(cmd)
+def _run(cmd, verbose):
+    if verbose:
+        print('# %s' % ' '.join(cmd))
+        stdout = None
+    else:
+        stdout = open('/dev/null', 'w')
+
+    subprocess.call(cmd, stdout=stdout, stderr=stdout)
+
+    if not verbose:
+        stdout.close()
 
 
 def main():
@@ -41,6 +49,7 @@ def main():
     parser.add_argument('--grub-cfg', metavar='PATH', help='Path grub.cfg file to apply')
     parser.add_argument('--grub2-mkrescue', default='grub2-mkrescue', metavar='COMMAND', help='grub2-mkrescue command (default: %(default)s)')
     parser.add_argument('--qemu', default='qemu-system-x86_64', metavar='COMMAND', help='kvm/qemu command (default: %(default)s)')
+    parser.add_argument('--verbose', default=False, action='store_true', help='Increase verbosity')
     parser.add_argument('source', metavar='PATH', help='Path of theme directory (or image file) to preview')
     parser.add_argument('--version', action='version', version='%(prog)s ' + VERSION_STR)
     options = parser.parse_args()
@@ -84,8 +93,8 @@ def main():
             '-hda', abs_tmp_file,
             ]
 
-        _run(assemble_cmd)
-        _run(run_command)
+        _run(assemble_cmd, options.verbose)
+        _run(run_command, options.verbose)
     except KeyboardInterrupt:
         pass
     finally:
