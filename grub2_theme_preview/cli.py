@@ -7,18 +7,15 @@ import errno
 import inspect
 import os
 from argparse import ArgumentParser
+from textwrap import dedent
 import subprocess
 import sys
 import tempfile
 from .version import VERSION_STR
 
 
-def _get_abs_self_dir():
-    return os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-
-
-def _is_run_from_git():
-    return os.path.exists(os.path.join(_get_abs_self_dir(), '..', '.git'))
+_PATH_IMAGE_ONLY = 'themes/DEMO.png'
+_PATH_FULL_THEME = 'themes/DEMO'
 
 
 def _mkdir_if_missing(path):
@@ -64,6 +61,67 @@ def _check_for_xorriso(xorriso_command):
         dev_null.close()
 
 
+def _make_menu_entries():
+    return dedent("""\
+            menuentry 'Debian' --class debian --class gnu-linux --class linux --class gnu --class os {
+                reboot
+            }
+
+            menuentry 'Gentoo' --class gentoo --class gnu-linux --class linux --class gnu --class os {
+                reboot
+            }
+
+            menuentry "Memtest86+" {
+                reboot
+            }
+
+            submenu 'Reboot / Shutdown' {
+                menuentry Reboot { reboot }
+                menuentry Shutdown { halt }
+            }
+            """)
+
+
+def _make_grub_cfg_load_our_theme(grub_cfg_content, is_full_theme):
+    # NOTE: The last font loaded becomes the default/fallback font
+    #       So if we load fonts first, the remaining default font
+    #       will remain unchanged and the theme will display unchanged.
+    prolog = dedent("""\
+            loadfont $prefix/fonts/unicode.pf2
+
+            insmod all_video
+            insmod gfxterm
+            insmod png
+            """)
+
+    common_epilog = dedent("""\
+            set timeout=-1
+            terminal_output gfxterm
+            """)
+
+    if is_full_theme:
+        epilog = common_epilog + dedent("""\
+                set theme=$prefix/%s/theme.txt
+                """ % _PATH_FULL_THEME)
+    else:
+        epilog = common_epilog + dedent("""\
+                background_image $prefix/%s
+                """ % _PATH_IMAGE_ONLY)
+
+    return prolog + grub_cfg_content + epilog
+
+
+def _make_final_grub_cfg_content(is_full_theme, source_grub_cfg):
+    if source_grub_cfg is not None:
+        f = open(source_grub_cfg, 'r')
+        content = f.read()
+        f.close()
+    else:
+        content = _make_menu_entries()
+
+    return _make_grub_cfg_load_our_theme(content, is_full_theme)
+
+
 def main():
     parser = ArgumentParser()
     parser.add_argument('--image', action='store_true', help='Preview a background image rather than a whole theme')
@@ -78,38 +136,33 @@ def main():
 
     _check_for_xorriso(options.xorriso)
 
-    if _is_run_from_git():
-        abs_share_root = os.path.normpath(os.path.join(_get_abs_self_dir(), '..', 'share'))
-    else:
-        abs_share_root = '/usr/share/grub2-theme-preview/'
-
-    if options.image:
-        if options.grub_cfg:
-            abs_grub_cfg = os.path.abspath(options.abs_grub_cfg)
-        else:
-            abs_grub_cfg = os.path.join(abs_share_root, 'background_image.cfg')
-    else:
-        abs_grub_cfg = os.path.join(abs_share_root, 'full_theme.cfg')
+    abs_grub_cfg_or_none = options.grub_cfg and os.path.abspath(options.grub_cfg)
+    grub_cfg_content = _make_final_grub_cfg_content(not options.image, abs_grub_cfg_or_none)
 
     normalized_source = os.path.normpath(os.path.abspath(options.source))
 
     abs_tmp_folder = tempfile.mkdtemp()
     try:
         abs_tmp_img_file = os.path.join(abs_tmp_folder, 'grub2_theme_demo.img')
+        abs_tmp_grub_cfg_file = os.path.join(abs_tmp_folder, 'grub.cfg')
+
+        f = open(abs_tmp_grub_cfg_file, 'w')
+        f.write(grub_cfg_content)
+        f.close()
 
         assemble_cmd = [
             options.grub2_mkrescue,
             '--output', abs_tmp_img_file,
-            'boot/grub/grub.cfg=%s' % abs_grub_cfg,
+            'boot/grub/grub.cfg=%s' % abs_tmp_grub_cfg_file,
             ]
 
         if options.image:
             assemble_cmd += [
-                'boot/grub/themes/DEMO.png=%s' % normalized_source,
+                'boot/grub/%s=%s' % (_PATH_IMAGE_ONLY, normalized_source),
                 ]
         else:
             assemble_cmd += [
-                'boot/grub/themes/DEMO/=%s' % normalized_source,
+                'boot/grub/%s/=%s' % (_PATH_FULL_THEME, normalized_source),
                 ]
 
         run_command = [
@@ -124,6 +177,7 @@ def main():
     finally:
         try:
             os.remove(abs_tmp_img_file)
+            os.remove(abs_tmp_grub_cfg_file)
             os.rmdir(abs_tmp_folder)
         except OSError:
             pass
