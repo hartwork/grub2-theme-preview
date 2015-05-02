@@ -113,10 +113,32 @@ def _make_grub_cfg_load_our_theme(grub_cfg_content, is_full_theme):
 
 def _make_final_grub_cfg_content(is_full_theme, source_grub_cfg):
     if source_grub_cfg is not None:
-        f = open(source_grub_cfg, 'r')
-        content = f.read()
-        f.close()
+        files_to_try_to_read = [source_grub_cfg]
+        fail_if_missing = True
     else:
+        files_to_try_to_read = [
+                '/boot/grub2/grub.cfg',
+                '/boot/grub/grub.cfg',
+                ]
+        fail_if_missing = False
+
+    for candidate in files_to_try_to_read:
+        if not os.path.exists(candidate):
+            if fail_if_missing:
+                print('ERROR: [Errno %d] %s: \'%s\'' % (errno.ENOENT, os.strerror(errno.ENOENT), candidate), file=sys.stderr)
+                sys.exit(1)
+            continue
+
+        try:
+            f = open(candidate, 'r')
+            content = f.read()
+            f.close()
+        except IOError as e:
+            print('INFO: %s' % str(e))
+        else:
+            break
+    else:
+        print('INFO: Could not read external GRUB config file, falling back to internal example config')
         content = _make_menu_entries()
 
     return _make_grub_cfg_load_our_theme(content, is_full_theme)
@@ -125,7 +147,7 @@ def _make_final_grub_cfg_content(is_full_theme, source_grub_cfg):
 def main():
     parser = ArgumentParser()
     parser.add_argument('--image', action='store_true', help='Preview a background image rather than a whole theme')
-    parser.add_argument('--grub-cfg', metavar='PATH', help='Path grub.cfg file to apply')
+    parser.add_argument('--grub-cfg', metavar='PATH', help='Path of custom grub.cfg file to use (default: /boot/grub{2,}/grub.cfg)')
     parser.add_argument('--grub2-mkrescue', default='grub2-mkrescue', metavar='COMMAND', help='grub2-mkrescue command (default: %(default)s)')
     parser.add_argument('--qemu', default='qemu-system-x86_64', metavar='COMMAND', help='kvm/qemu command (default: %(default)s)')
     parser.add_argument('--xorriso', default='xorriso', metavar='COMMAND', help='xorriso command (default: %(default)s)')
