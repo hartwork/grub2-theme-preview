@@ -95,11 +95,11 @@ def main():
 
     abs_tmp_folder = tempfile.mkdtemp()
     try:
-        abs_tmp_file = os.path.join(abs_tmp_folder, 'grub2_theme_demo.img')
+        abs_tmp_img_file = os.path.join(abs_tmp_folder, 'grub2_theme_demo.img')
 
         assemble_cmd = [
             options.grub2_mkrescue,
-            '--output', abs_tmp_file,
+            '--output', abs_tmp_img_file,
             'boot/grub/grub.cfg=%s' % abs_grub_cfg,
             ]
 
@@ -114,7 +114,7 @@ def main():
 
         run_command = [
             options.qemu,
-            '-hda', abs_tmp_file,
+            '-hda', abs_tmp_img_file,
             ]
 
         _run(assemble_cmd, options.verbose)
@@ -123,7 +123,7 @@ def main():
         pass
     finally:
         try:
-            os.remove(abs_tmp_file)
+            os.remove(abs_tmp_img_file)
             os.rmdir(abs_tmp_folder)
         except OSError:
             pass
