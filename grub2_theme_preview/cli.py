@@ -8,6 +8,7 @@ import inspect
 import os
 from argparse import ArgumentParser
 import subprocess
+import sys
 import tempfile
 from .version import VERSION_STR
 
@@ -43,16 +44,39 @@ def _run(cmd, verbose):
         stdout.close()
 
 
+def _check_for_xorriso(xorriso_command):
+    cmd = [xorriso_command, '--version']
+    dev_null = open('/dev/null', 'w')
+    try:
+        subprocess.call(cmd, stdout=dev_null, stderr=dev_null)
+    except OSError:
+        msg = (
+            'ERROR: '
+            'You do not seem to have xorriso (of libisoburn/libburnia) installed.'
+            ' '
+            'Without xorriso, grub2-mkrescue has little chance of producing bootable images.'
+            ' '
+            'If this complaint seems mistaken to you, please use the --xorriso parameter to work around this check.'
+        )
+        print(msg, file=sys.stderr)
+        sys.exit(1)
+    finally:
+        dev_null.close()
+
+
 def main():
     parser = ArgumentParser()
     parser.add_argument('--image', action='store_true', help='Preview a background image rather than a whole theme')
     parser.add_argument('--grub-cfg', metavar='PATH', help='Path grub.cfg file to apply')
     parser.add_argument('--grub2-mkrescue', default='grub2-mkrescue', metavar='COMMAND', help='grub2-mkrescue command (default: %(default)s)')
     parser.add_argument('--qemu', default='qemu-system-x86_64', metavar='COMMAND', help='kvm/qemu command (default: %(default)s)')
+    parser.add_argument('--xorriso', default='xorriso', metavar='COMMAND', help='xorriso command (default: %(default)s)')
     parser.add_argument('--verbose', default=False, action='store_true', help='Increase verbosity')
     parser.add_argument('source', metavar='PATH', help='Path of theme directory (or image file) to preview')
     parser.add_argument('--version', action='version', version='%(prog)s ' + VERSION_STR)
     options = parser.parse_args()
+
+    _check_for_xorriso(options.xorriso)
 
     if _is_run_from_git():
         abs_share_root = os.path.normpath(os.path.join(_get_abs_self_dir(), '..', 'share'))
