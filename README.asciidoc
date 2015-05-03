@@ -1,12 +1,12 @@
 About
 -----
-*grub2-theme-preview* came into live when I was looking around for
+*grub2-theme-preview* came into life when I was looking around for
 available GRUB 2.x themes and wanted a way to quickly see a theme
 in action without rebooting real hardware.
 
 It takes a theme folder (or just a single picture),
 creates a temporary bootable image using `grub2-mkrescue` and launches
-that image in a virtual machine using QEMU, all without root privilages.
+that image in a virtual machine using QEMU, all without root privileges.
 
 
 Usage
