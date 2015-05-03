@@ -1,0 +1,35 @@
+About
+-----
+*grub2-theme-preview* came into live when I was looking around for
+available GRUB 2.x themes and wanted a way to quickly see a theme
+in action without rebooting real hardware.
+
+It takes a theme folder (or just a single picture),
+creates a temporary bootable image using `grub2-mkrescue` and launches
+that image in a virtual machine using QEMU, all without root privilages.
+
+
+Usage
+-----
+----------------------------------------------------------------------------
+# grub2-theme-preview --help
+usage: grub2-theme-preview [-h] [--image] [--grub-cfg PATH]
+                           [--grub2-mkrescue COMMAND] [--qemu COMMAND]
+                           [--xorriso COMMAND] [--verbose] [--version]
+                           PATH
+
+positional arguments:
+  PATH                  Path of theme directory (or image file) to preview
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --image               Preview a background image rather than a whole theme
+  --grub-cfg PATH       Path of custom grub.cfg file to use (default:
+                        /boot/grub{2,}/grub.cfg)
+  --grub2-mkrescue COMMAND
+                        grub2-mkrescue command (default: grub2-mkrescue)
+  --qemu COMMAND        kvm/qemu command (default: qemu-system-x86_64)
+  --xorriso COMMAND     xorriso command (default: xorriso)
+  --verbose             Increase verbosity
+  --version             show program's version number and exit
+----------------------------------------------------------------------------
