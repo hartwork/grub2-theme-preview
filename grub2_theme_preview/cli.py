@@ -6,6 +6,7 @@ from __future__ import print_function
 import errno
 import inspect
 import os
+import re
 from argparse import ArgumentParser
 from textwrap import dedent
 import subprocess
@@ -82,36 +83,43 @@ def _make_menu_entries():
             """)
 
 
-def _make_grub_cfg_load_our_theme(grub_cfg_content, is_full_theme):
+def _make_grub_cfg_load_our_theme(grub_cfg_content, is_full_theme, resolution_or_none):
     # NOTE: The last font loaded becomes the default/fallback font
     #       So if we load fonts first, the remaining default font
     #       will remain unchanged and the theme will display unchanged.
-    prolog = dedent("""\
-            loadfont $prefix/fonts/unicode.pf2
+    prolog_chunks = [
+            'loadfont $prefix/fonts/unicode.pf2',
+            'insmod all_video',
+            'insmod gfxterm',
+            'insmod png',
+            ]
+    if resolution_or_none is not None:
+        # We need to be the first call to 'terminal_output gfxterm'
+        # if we want to have a say with resolution
+        prolog_chunks.append('set gfxmode=%dx%d' % resolution_or_none)
+        prolog_chunks.append('terminal_output gfxterm')
 
-            insmod all_video
-            insmod gfxterm
-            insmod png
-            """)
+    prolog_chunks.append('')  # trailing new line
 
-    common_epilog = dedent("""\
-            set timeout=-1
-            terminal_output gfxterm
-            """)
+    epilog_chunks = [
+            '',  # leading new line
+            'set timeout=-1',
+            ]
 
     if is_full_theme:
-        epilog = common_epilog + dedent("""\
-                set theme=$prefix/%s/theme.txt
-                """ % _PATH_FULL_THEME)
+        epilog_chunks.append('set theme=$prefix/%s/theme.txt' % _PATH_FULL_THEME)
     else:
-        epilog = common_epilog + dedent("""\
-                background_image $prefix/%s
-                """ % _PATH_IMAGE_ONLY)
+        epilog_chunks.append('background_image $prefix/%s' % _PATH_IMAGE_ONLY)
 
-    return prolog + grub_cfg_content + epilog
+    if resolution_or_none is None:
+        # If we haven't ensured GFX mode earlier, do it now
+        # so it's done at least once
+        epilog_chunks.append('terminal_output gfxterm')
+
+    return '\n'.join(prolog_chunks) + grub_cfg_content + '\n'.join(epilog_chunks)
 
 
-def _make_final_grub_cfg_content(is_full_theme, source_grub_cfg):
+def _make_final_grub_cfg_content(is_full_theme, source_grub_cfg, resolution_or_none):
     if source_grub_cfg is not None:
         files_to_try_to_read = [source_grub_cfg]
         fail_if_missing = True
@@ -141,7 +149,16 @@ def _make_final_grub_cfg_content(is_full_theme, source_grub_cfg):
         print('INFO: Could not read external GRUB config file, falling back to internal example config')
         content = _make_menu_entries()
 
-    return _make_grub_cfg_load_our_theme(content, is_full_theme)
+    return _make_grub_cfg_load_our_theme(content, is_full_theme, resolution_or_none)
+
+
+def resolution(text):
+    m = re.match('^([1-9][0-9]{2,})x([1-9][0-9]{2,})$', text)
+    if not m:
+        raise ValueError('Not a supported resolution: "%s"' % text)
+    width = int(m.group(1))
+    height = int(m.group(2))
+    return (width, height)
 
 
 def main():
@@ -152,6 +169,7 @@ def main():
     parser.add_argument('--qemu', default='qemu-system-x86_64', metavar='COMMAND', help='kvm/qemu command (default: %(default)s)')
     parser.add_argument('--xorriso', default='xorriso', metavar='COMMAND', help='xorriso command (default: %(default)s)')
     parser.add_argument('--verbose', default=False, action='store_true', help='Increase verbosity')
+    parser.add_argument('--resolution', metavar='WxH', type=resolution, help='Set a custom resolution, e.g. 800x600')
     parser.add_argument('source', metavar='PATH', help='Path of theme directory (or image file) to preview')
     parser.add_argument('--version', action='version', version='%(prog)s ' + VERSION_STR)
     options = parser.parse_args()
@@ -159,7 +177,11 @@ def main():
     _check_for_xorriso(options.xorriso)
 
     abs_grub_cfg_or_none = options.grub_cfg and os.path.abspath(options.grub_cfg)
-    grub_cfg_content = _make_final_grub_cfg_content(not options.image, abs_grub_cfg_or_none)
+    grub_cfg_content = _make_final_grub_cfg_content(
+            not options.image,
+            abs_grub_cfg_or_none,
+            options.resolution,
+            )
 
     normalized_source = os.path.normpath(os.path.abspath(options.source))
 
