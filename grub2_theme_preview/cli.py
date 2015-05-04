@@ -4,6 +4,7 @@
 from __future__ import print_function
 
 import errno
+import glob
 import inspect
 import os
 import re
@@ -83,16 +84,23 @@ def _make_menu_entries():
             """)
 
 
-def _make_grub_cfg_load_our_theme(grub_cfg_content, is_full_theme, resolution_or_none):
+def _make_grub_cfg_load_our_theme(grub_cfg_content, is_full_theme, resolution_or_none, font_files_to_load):
     # NOTE: The last font loaded becomes the default/fallback font
     #       So if we load fonts first, the remaining default font
     #       will remain unchanged and the theme will display unchanged.
     prolog_chunks = [
             'loadfont $prefix/fonts/unicode.pf2',
+            ]
+
+    for relative_path in font_files_to_load:
+        prolog_chunks.append('loadfont $prefix/%s/%s' % (_PATH_FULL_THEME, relative_path))
+
+    prolog_chunks += [
             'insmod all_video',
             'insmod gfxterm',
             'insmod png',
             ]
+
     if resolution_or_none is not None:
         # We need to be the first call to 'terminal_output gfxterm'
         # if we want to have a say with resolution
@@ -119,7 +127,7 @@ def _make_grub_cfg_load_our_theme(grub_cfg_content, is_full_theme, resolution_or
     return '\n'.join(prolog_chunks) + grub_cfg_content + '\n'.join(epilog_chunks)
 
 
-def _make_final_grub_cfg_content(is_full_theme, source_grub_cfg, resolution_or_none):
+def _make_final_grub_cfg_content(is_full_theme, source_grub_cfg, resolution_or_none, font_files_to_load):
     if source_grub_cfg is not None:
         files_to_try_to_read = [source_grub_cfg]
         fail_if_missing = True
@@ -149,7 +157,7 @@ def _make_final_grub_cfg_content(is_full_theme, source_grub_cfg, resolution_or_n
         print('INFO: Could not read external GRUB config file, falling back to internal example config')
         content = _make_menu_entries()
 
-    return _make_grub_cfg_load_our_theme(content, is_full_theme, resolution_or_none)
+    return _make_grub_cfg_load_our_theme(content, is_full_theme, resolution_or_none, font_files_to_load)
 
 
 def resolution(text):
@@ -159,6 +167,19 @@ def resolution(text):
     width = int(m.group(1))
     height = int(m.group(2))
     return (width, height)
+
+
+def iterate_pf2_files_relative(abs_theme_dir):
+    # Imitate /etc/grub.d/00_header:
+    # for x in "$themedir"/*.pf2 "$themedir"/f/*.pf2; do
+    for pattern in (
+            os.path.join(abs_theme_dir, '*.pf2'),
+            os.path.join(abs_theme_dir, 'f', '*.pf2'),
+            ):
+        for path in sorted(glob.iglob(pattern), key=lambda path: path.lower()):
+            relative_path = os.path.relpath(path, abs_theme_dir)
+            print('INFO: Appending to fonts to load: %s' % relative_path)
+            yield relative_path
 
 
 def main():
@@ -176,14 +197,20 @@ def main():
 
     _check_for_xorriso(options.xorriso)
 
+    normalized_source = os.path.normpath(os.path.abspath(options.source))
+
+    if options.image:
+        font_files_to_load = []
+    else:
+        font_files_to_load = list(iterate_pf2_files_relative(normalized_source))
+
     abs_grub_cfg_or_none = options.grub_cfg and os.path.abspath(options.grub_cfg)
     grub_cfg_content = _make_final_grub_cfg_content(
             not options.image,
             abs_grub_cfg_or_none,
             options.resolution,
+            font_files_to_load,
             )
-
-    normalized_source = os.path.normpath(os.path.abspath(options.source))
 
     abs_tmp_folder = tempfile.mkdtemp()
     try:
