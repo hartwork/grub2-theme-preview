@@ -15,7 +15,8 @@ Usage
 # grub2-theme-preview --help
 usage: grub2-theme-preview [-h] [--image] [--grub-cfg PATH]
                            [--grub2-mkrescue COMMAND] [--qemu COMMAND]
-                           [--xorriso COMMAND] [--verbose] [--version]
+                           [--xorriso COMMAND] [--verbose] [--resolution WxH]
+                           [--version]
                            PATH
 
 positional arguments:
@@ -31,5 +32,6 @@ optional arguments:
   --qemu COMMAND        kvm/qemu command (default: qemu-system-x86_64)
   --xorriso COMMAND     xorriso command (default: xorriso)
   --verbose             Increase verbosity
+  --resolution WxH      Set a custom resolution, e.g. 800x600
   --version             show program's version number and exit
 ----------------------------------------------------------------------------
