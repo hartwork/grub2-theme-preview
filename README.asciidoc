@@ -6,7 +6,7 @@ in action without rebooting real hardware.
 
 It takes a theme folder (or just a single picture),
 creates a temporary bootable image using `grub2-mkrescue` and launches
-that image in a virtual machine using QEMU, all without root privileges.
+that image in a virtual machine using KVM/QEMU, all without root privileges.
 
 
 Usage
