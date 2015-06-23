@@ -238,7 +238,7 @@ def main():
 
         run_command = [
             options.qemu,
-            '-hda', abs_tmp_img_file,
+            '-drive', 'file=%s,index=0,media=disk,format=raw' % abs_tmp_img_file,
             ]
 
         _run(assemble_cmd, options.verbose)
