@@ -238,9 +238,8 @@ def _inner_main(options):
         abs_tmp_img_file = os.path.join(abs_tmp_folder, 'grub2_theme_demo.img')
         abs_tmp_grub_cfg_file = os.path.join(abs_tmp_folder, 'grub.cfg')
 
-        f = open(abs_tmp_grub_cfg_file, 'w')
-        f.write(grub_cfg_content)
-        f.close()
+        with open(abs_tmp_grub_cfg_file, 'w') as f:
+            f.write(grub_cfg_content)
 
         assemble_cmd = [
             options.grub2_mkrescue,
