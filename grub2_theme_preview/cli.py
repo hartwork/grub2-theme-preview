@@ -215,6 +215,13 @@ def parse_command_line():
     return parser.parse_args()
 
 
+def _ignore_oserror(func, *args, **kwargs):
+    try:
+        func(*args, **kwargs)
+    except OSError:
+        pass
+
+
 def _inner_main(options):
     _check_for_xorriso(options.xorriso)
 
@@ -263,20 +270,11 @@ def _inner_main(options):
                     ]
                 _run(run_command, options.verbose)
             finally:
-                try:
-                    os.remove(abs_tmp_img_file)
-                except OSError:
-                    pass
+                _ignore_oserror(os.remove, abs_tmp_img_file)
         finally:
-            try:
-                os.remove(abs_tmp_grub_cfg_file)
-            except OSError:
-                pass
+            _ignore_oserror(os.remove, abs_tmp_grub_cfg_file)
     finally:
-        try:
-            os.rmdir(abs_tmp_folder)
-        except OSError:
-            pass
+        _ignore_oserror(os.rmdir, abs_tmp_folder)
 
 
 def main():
