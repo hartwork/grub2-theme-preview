@@ -235,38 +235,45 @@ def _inner_main(options):
 
     abs_tmp_folder = tempfile.mkdtemp()
     try:
-        abs_tmp_img_file = os.path.join(abs_tmp_folder, 'grub2_theme_demo.img')
         abs_tmp_grub_cfg_file = os.path.join(abs_tmp_folder, 'grub.cfg')
-
         with open(abs_tmp_grub_cfg_file, 'w') as f:
             f.write(grub_cfg_content)
 
-        assemble_cmd = [
-            options.grub2_mkrescue,
-            '--output', abs_tmp_img_file,
-            'boot/grub/grub.cfg=%s' % abs_tmp_grub_cfg_file,
-            ]
-
-        if options.image:
-            assemble_cmd += [
-                'boot/grub/%s=%s' % (_PATH_IMAGE_ONLY, normalized_source),
+        try:
+            abs_tmp_img_file = os.path.join(abs_tmp_folder, 'grub2_theme_demo.img')
+            assemble_cmd = [
+                options.grub2_mkrescue,
+                '--output', abs_tmp_img_file,
+                'boot/grub/grub.cfg=%s' % abs_tmp_grub_cfg_file,
                 ]
-        else:
-            assemble_cmd += [
-                'boot/grub/%s/=%s' % (_PATH_FULL_THEME, normalized_source),
-                ]
+            try:
+                if options.image:
+                    assemble_cmd += [
+                        'boot/grub/%s=%s' % (_PATH_IMAGE_ONLY, normalized_source),
+                        ]
+                else:
+                    assemble_cmd += [
+                        'boot/grub/%s/=%s' % (_PATH_FULL_THEME, normalized_source),
+                        ]
+                _run(assemble_cmd, options.verbose)
 
-        run_command = [
-            options.qemu,
-            '-drive', 'file=%s,index=0,media=disk,format=raw' % abs_tmp_img_file,
-            ]
-
-        _run(assemble_cmd, options.verbose)
-        _run(run_command, options.verbose)
+                run_command = [
+                    options.qemu,
+                    '-drive', 'file=%s,index=0,media=disk,format=raw' % abs_tmp_img_file,
+                    ]
+                _run(run_command, options.verbose)
+            finally:
+                try:
+                    os.remove(abs_tmp_img_file)
+                except OSError:
+                    pass
+        finally:
+            try:
+                os.remove(abs_tmp_grub_cfg_file)
+            except OSError:
+                pass
     finally:
         try:
-            os.remove(abs_tmp_img_file)
-            os.remove(abs_tmp_grub_cfg_file)
             os.rmdir(abs_tmp_folder)
         except OSError:
             pass
