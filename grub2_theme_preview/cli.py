@@ -20,6 +20,14 @@ _PATH_IMAGE_ONLY = 'themes/DEMO.png'
 _PATH_FULL_THEME = 'themes/DEMO'
 
 
+class _CommandNotFoundException(Exception):
+    def __init__(self, command):
+        self._command = command
+
+    def __str__(self):
+        return 'Command "%s" not found' % self._command
+
+
 def _mkdir_if_missing(path):
     try:
         os.mkdir(path)
@@ -37,10 +45,15 @@ def _run(cmd, verbose):
     else:
         stdout = open('/dev/null', 'w')
 
-    subprocess.call(cmd, stdout=stdout, stderr=stdout)
-
-    if not verbose:
-        stdout.close()
+    try:
+        subprocess.call(cmd, stdout=stdout, stderr=stdout)
+    except OSError as e:
+        if e.errno != errno.ENOENT:
+            raise
+        raise _CommandNotFoundException(cmd[0])
+    finally:
+        if not verbose:
+            stdout.close()
 
 
 def _check_for_xorriso(xorriso_command):
