@@ -10,14 +10,19 @@ import os
 import re
 from argparse import ArgumentParser
 from textwrap import dedent
+import signal
 import subprocess
 import sys
 import tempfile
+import traceback
+
 from .version import VERSION_STR
 
 
 _PATH_IMAGE_ONLY = 'themes/DEMO.png'
 _PATH_FULL_THEME = 'themes/DEMO'
+
+_KILL_BY_SIGNAL = 128
 
 
 class _CommandNotFoundException(Exception):
@@ -195,7 +200,7 @@ def iterate_pf2_files_relative(abs_theme_dir):
             yield relative_path
 
 
-def main():
+def parse_command_line():
     parser = ArgumentParser()
     parser.add_argument('--image', action='store_true', help='Preview a background image rather than a whole theme')
     parser.add_argument('--grub-cfg', metavar='PATH', help='Path of custom grub.cfg file to use (default: /boot/grub{2,}/grub.cfg)')
@@ -203,11 +208,14 @@ def main():
     parser.add_argument('--qemu', default='qemu-system-x86_64', metavar='COMMAND', help='kvm/qemu command (default: %(default)s)')
     parser.add_argument('--xorriso', default='xorriso', metavar='COMMAND', help='xorriso command (default: %(default)s)')
     parser.add_argument('--verbose', default=False, action='store_true', help='Increase verbosity')
+    parser.add_argument('--debug', default=False, action='store_true', help='Enable debugging output')
     parser.add_argument('--resolution', metavar='WxH', type=resolution, help='Set a custom resolution, e.g. 800x600')
     parser.add_argument('source', metavar='PATH', help='Path of theme directory (or image file) to preview')
     parser.add_argument('--version', action='version', version='%(prog)s ' + VERSION_STR)
-    options = parser.parse_args()
+    return parser.parse_args()
 
+
+def _inner_main(options):
     _check_for_xorriso(options.xorriso)
 
     normalized_source = os.path.normpath(os.path.abspath(options.source))
@@ -256,8 +264,6 @@ def main():
 
         _run(assemble_cmd, options.verbose)
         _run(run_command, options.verbose)
-    except KeyboardInterrupt:
-        pass
     finally:
         try:
             os.remove(abs_tmp_img_file)
@@ -265,3 +271,20 @@ def main():
             os.rmdir(abs_tmp_folder)
         except OSError:
             pass
+
+
+def main():
+    try:
+        options = parse_command_line()
+    except KeyboardInterrupt:
+        sys.exit(_KILL_BY_SIGNAL + signal.SIGINT)
+
+    try:
+        _inner_main(options)
+    except KeyboardInterrupt:
+        sys.exit(_KILL_BY_SIGNAL + signal.SIGINT)
+    except BaseException as e:
+        if options.debug:
+            traceback.print_exc()
+        print('ERROR: %s' % str(e), file=sys.stderr)
+        sys.exit(1)
