@@ -269,6 +269,10 @@ def _inner_main(options):
                         ]
                 _run(assemble_cmd, options.verbose)
 
+                if not os.path.exists(abs_tmp_img_file):
+                    command = os.path.basename(options.grub2_mkrescue)
+                    raise OSError(errno.ENOENT, '%s failed to create the rescue image' % command)
+
                 print('INFO: Please give GRUB a moment to show up in QEMU...')
 
                 run_command = [
