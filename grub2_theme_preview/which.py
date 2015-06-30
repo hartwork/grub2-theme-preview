@@ -16,7 +16,7 @@ def which(command):
             continue
 
         if not os.access(candidate, os.X_OK):
-            raise OSError(errno.EPERM, 'File "%s" not executable')
+            raise OSError(errno.EPERM, 'File "%s" not executable' % candidate)
 
         return candidate
 
