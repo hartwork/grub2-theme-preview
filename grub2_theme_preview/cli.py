@@ -263,6 +263,8 @@ def _inner_main(options):
                         ]
                 _run(assemble_cmd, options.verbose)
 
+                print('INFO: Please give GRUB a moment to show up in QEMU...')
+
                 run_command = [
                     options.qemu,
                     '-drive', 'file=%s,index=0,media=disk,format=raw' % abs_tmp_img_file,
