@@ -248,6 +248,7 @@ def _inner_main(options):
             abs_tmp_img_file = os.path.join(abs_tmp_folder, 'grub2_theme_demo.img')
             assemble_cmd = [
                 options.grub2_mkrescue,
+                '--xorriso', options.xorriso,
                 '--output', abs_tmp_img_file,
                 'boot/grub/grub.cfg=%s' % abs_tmp_grub_cfg_file,
                 ]
