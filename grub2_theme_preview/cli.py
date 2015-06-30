@@ -17,6 +17,7 @@ import tempfile
 import traceback
 
 from .version import VERSION_STR
+from .which import which
 
 
 _PATH_IMAGE_ONLY = 'themes/DEMO.png'
@@ -26,11 +27,15 @@ _KILL_BY_SIGNAL = 128
 
 
 class _CommandNotFoundException(Exception):
-    def __init__(self, command):
+    def __init__(self, command, package=None):
         self._command = command
+        self._package = package
 
     def __str__(self):
-        return 'Command "%s" not found' % self._command
+        if self._package is None:
+            return 'Command "%s" not found' % self._command
+        else:
+            return 'Command "%s" of %s not found' % (self._command, self._package)
 
 
 def _mkdir_if_missing(path):
@@ -59,26 +64,6 @@ def _run(cmd, verbose):
     finally:
         if not verbose:
             stdout.close()
-
-
-def _check_for_xorriso(xorriso_command):
-    cmd = [xorriso_command, '--version']
-    dev_null = open('/dev/null', 'w')
-    try:
-        subprocess.call(cmd, stdout=dev_null, stderr=dev_null)
-    except OSError:
-        msg = (
-            'ERROR: '
-            'You do not seem to have xorriso (of libisoburn/libburnia) installed.'
-            ' '
-            'Without xorriso, grub2-mkrescue has little chance of producing bootable images.'
-            ' '
-            'If this complaint seems mistaken to you, please use the --xorriso parameter to work around this check.'
-        )
-        print(msg, file=sys.stderr)
-        sys.exit(1)
-    finally:
-        dev_null.close()
 
 
 def _make_menu_entries():
@@ -223,7 +208,17 @@ def _ignore_oserror(func, *args, **kwargs):
 
 
 def _inner_main(options):
-    _check_for_xorriso(options.xorriso)
+    for command, package in (
+            (options.grub2_mkrescue, 'Grub 2.x'),
+            ('mcopy', 'mtools'),    # see issue #8
+            ('mformat', 'mtools'),  # see issue #8
+            (options.qemu, 'KVM/QEMU'),
+            (options.xorriso, 'libisoburn'),
+            ):
+        try:
+            which(command)
+        except OSError:
+            raise _CommandNotFoundException(command, package)
 
     normalized_source = os.path.normpath(os.path.abspath(options.source))
 
