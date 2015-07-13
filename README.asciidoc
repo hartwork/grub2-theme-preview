@@ -15,8 +15,8 @@ Usage
 # grub2-theme-preview --help
 usage: grub2-theme-preview [-h] [--image] [--grub-cfg PATH] [--qemu COMMAND]
                            [--verbose] [--debug] [--resolution WxH]
-                           [--version] [--grub2-mkrescue COMMAND]
-                           [--xorriso COMMAND]
+                           [--timeout SECONDS] [--version]
+                           [--grub2-mkrescue COMMAND] [--xorriso COMMAND]
                            PATH
 
 positional arguments:
@@ -31,6 +31,8 @@ optional arguments:
   --verbose             Increase verbosity
   --debug               Enable debugging output
   --resolution WxH      Set a custom resolution, e.g. 800x600
+  --timeout SECONDS     Set timeout in whole seconds or -1 to disable
+                        (default: 30 seconds)
   --version             show program's version number and exit
 
 command location arguments:
