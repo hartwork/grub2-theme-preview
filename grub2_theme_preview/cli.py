@@ -87,7 +87,7 @@ def _make_menu_entries():
             """)
 
 
-def _make_grub_cfg_load_our_theme(grub_cfg_content, is_full_theme, resolution_or_none, font_files_to_load):
+def _make_grub_cfg_load_our_theme(grub_cfg_content, is_full_theme, resolution_or_none, font_files_to_load, timeout_seconds):
     # NOTE: The last font loaded becomes the default/fallback font
     #       So if we load fonts first, the remaining default font
     #       will remain unchanged and the theme will display unchanged.
@@ -114,7 +114,7 @@ def _make_grub_cfg_load_our_theme(grub_cfg_content, is_full_theme, resolution_or
 
     epilog_chunks = [
             '',  # leading new line
-            'set timeout=-1',
+            'set timeout=%d' % timeout_seconds,
             ]
 
     if is_full_theme:
@@ -130,7 +130,7 @@ def _make_grub_cfg_load_our_theme(grub_cfg_content, is_full_theme, resolution_or
     return '\n'.join(prolog_chunks) + grub_cfg_content + '\n'.join(epilog_chunks)
 
 
-def _make_final_grub_cfg_content(is_full_theme, source_grub_cfg, resolution_or_none, font_files_to_load):
+def _make_final_grub_cfg_content(is_full_theme, source_grub_cfg, resolution_or_none, font_files_to_load, timeout_seconds):
     if source_grub_cfg is not None:
         files_to_try_to_read = [source_grub_cfg]
         fail_if_missing = True
@@ -160,7 +160,7 @@ def _make_final_grub_cfg_content(is_full_theme, source_grub_cfg, resolution_or_n
         print('INFO: Could not read external GRUB config file, falling back to internal example config')
         content = _make_menu_entries()
 
-    return _make_grub_cfg_load_our_theme(content, is_full_theme, resolution_or_none, font_files_to_load)
+    return _make_grub_cfg_load_our_theme(content, is_full_theme, resolution_or_none, font_files_to_load, timeout_seconds)
 
 
 def resolution(text):
@@ -170,6 +170,13 @@ def resolution(text):
     width = int(m.group(1))
     height = int(m.group(2))
     return (width, height)
+
+
+def timeout(text):
+    seconds = int(text)
+    if seconds < 0:
+        seconds = -1
+    return seconds
 
 
 def iterate_pf2_files_relative(abs_theme_dir):
@@ -193,6 +200,8 @@ def parse_command_line():
     parser.add_argument('--verbose', default=False, action='store_true', help='Increase verbosity')
     parser.add_argument('--debug', default=False, action='store_true', help='Enable debugging output')
     parser.add_argument('--resolution', metavar='WxH', type=resolution, help='Set a custom resolution, e.g. 800x600')
+    parser.add_argument('--timeout', metavar='SECONDS', dest='timeout_seconds', type=timeout, default=30,
+            help='Set timeout in whole seconds or -1 to disable (default: %(default)s seconds)')
     parser.add_argument('source', metavar='PATH', help='Path of theme directory (or image file) to preview')
     parser.add_argument('--version', action='version', version='%(prog)s ' + VERSION_STR)
 
@@ -242,6 +251,7 @@ def _inner_main(options):
             abs_grub_cfg_or_none,
             options.resolution,
             font_files_to_load,
+            options.timeout_seconds,
             )
 
     abs_tmp_folder = tempfile.mkdtemp()
