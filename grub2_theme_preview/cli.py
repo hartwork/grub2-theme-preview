@@ -117,15 +117,15 @@ def _make_grub_cfg_load_our_theme(grub_cfg_content, is_full_theme, resolution_or
             'set timeout=%d' % timeout_seconds,
             ]
 
-    if is_full_theme:
-        epilog_chunks.append('set theme=$prefix/%s/theme.txt' % _PATH_FULL_THEME)
-    else:
-        epilog_chunks.append('background_image $prefix/%s' % _PATH_IMAGE_ONLY)
-
     if resolution_or_none is None:
         # If we haven't ensured GFX mode earlier, do it now
         # so it's done at least once
         epilog_chunks.append('terminal_output gfxterm')
+
+    if is_full_theme:
+        epilog_chunks.append('set theme=$prefix/%s/theme.txt' % _PATH_FULL_THEME)
+    else:
+        epilog_chunks.append('background_image $prefix/%s' % _PATH_IMAGE_ONLY)
 
     return '\n'.join(prolog_chunks) + grub_cfg_content + '\n'.join(epilog_chunks)
 
