@@ -1,5 +1,6 @@
 About
------
+=====
+
 *grub2-theme-preview* came into life when I was looking around for
 available GRUB 2.x themes and wanted a way to quickly see a theme
 in action without rebooting real hardware.
@@ -9,10 +10,21 @@ creates a temporary bootable image using `grub2-mkrescue` and launches
 that image in a virtual machine using KVM/QEMU, all without root privileges.
 
 
-Usage
------
-----------------------------------------------------------------------------
-# grub2-theme-preview --help
+## Install
+
+Run `make install` with root privileges.
+
+Dependencies:
+ - `grub2-mkrescue` - (can be installed as `grub-mkrescue` on some systems)
+ - [QEMU](http://wiki.qemu.org/Main_Page) - "... hypervisor that performs hardware virtualization"
+ - [mtools](https://www.gnu.org/software/mtools/) - "... collection of utilities to access MS-DOS"
+ - [libisoburn](http://libburnia-project.org/) - "frontend [...] which enables creation and expansion of the ISO format"
+
+
+## Usage
+
+```
+$ grub2-theme-preview --help
 usage: grub2-theme-preview [-h] [--image] [--grub-cfg PATH] [--qemu COMMAND]
                            [--verbose] [--debug] [--resolution WxH]
                            [--timeout SECONDS] [--version]
@@ -39,4 +51,4 @@ command location arguments:
   --grub2-mkrescue COMMAND
                         grub2-mkrescue command (default: grub2-mkrescue)
   --xorriso COMMAND     xorriso command (default: xorriso)
-----------------------------------------------------------------------------
+```
