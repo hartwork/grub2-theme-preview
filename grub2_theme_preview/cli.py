@@ -206,7 +206,7 @@ def parse_command_line():
     parser.add_argument('--version', action='version', version='%(prog)s ' + VERSION_STR)
 
     commands = parser.add_argument_group('command location arguments')
-    commands.add_argument('--grub2-mkrescue', default='grub2-mkrescue', metavar='COMMAND', help='grub2-mkrescue command (default: %(default)s)')
+    commands.add_argument('--grub2-mkrescue', default='grub-mkrescue', metavar='COMMAND', help='grub2-mkrescue command (default: %(default)s)')
     commands.add_argument('--xorriso', default='xorriso', metavar='COMMAND', help='xorriso command (default: %(default)s)')
 
     options = parser.parse_args()
