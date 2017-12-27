@@ -196,7 +196,6 @@ def parse_command_line():
     parser = ArgumentParser()
     parser.add_argument('--image', action='store_true', help='Preview a background image rather than a whole theme')
     parser.add_argument('--grub-cfg', metavar='PATH', help='Path of custom grub.cfg file to use (default: /boot/grub{2,}/grub.cfg)')
-    parser.add_argument('--qemu', metavar='COMMAND', help='KVM/QEMU command (default: qemu-system-<machine>)')
     parser.add_argument('--verbose', default=False, action='store_true', help='Increase verbosity')
     parser.add_argument('--debug', default=False, action='store_true', help='Enable debugging output')
     parser.add_argument('--resolution', metavar='WxH', type=resolution, help='Set a custom resolution, e.g. 800x600')
@@ -207,6 +206,7 @@ def parse_command_line():
 
     commands = parser.add_argument_group('command location arguments')
     commands.add_argument('--grub2-mkrescue', default='grub-mkrescue', metavar='COMMAND', help='grub2-mkrescue command (default: %(default)s)')
+    commands.add_argument('--qemu', metavar='COMMAND', help='KVM/QEMU command (default: qemu-system-<machine>)')
     commands.add_argument('--xorriso', default='xorriso', metavar='COMMAND', help='xorriso command (default: %(default)s)')
 
     options = parser.parse_args()
