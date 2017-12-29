@@ -5,7 +5,6 @@ from __future__ import print_function
 
 import errno
 import glob
-import inspect
 import os
 import re
 from argparse import ArgumentParser
