@@ -269,11 +269,15 @@ def _inner_main(options):
         with open(abs_tmp_grub_cfg_file, 'w') as f:
             f.write(grub_cfg_content)
 
+        grub2_platform_directory = _grub2_directory(_GRUB2_PLATFORM)
+        if not os.path.exists(grub2_platform_directory):
+            raise OSError(errno.ENOENT, 'GRUB platform directory "%s" not found' % grub2_platform_directory)
+
         try:
             abs_tmp_img_file = os.path.join(abs_tmp_folder, 'grub2_theme_demo.img')
             assemble_cmd = [
                 options.grub2_mkrescue,
-                '--directory=%s' % _grub2_directory(_GRUB2_PLATFORM),
+                '--directory=%s' % grub2_platform_directory,
                 '--xorriso', options.xorriso,
                 '--output', abs_tmp_img_file,
                 ]
