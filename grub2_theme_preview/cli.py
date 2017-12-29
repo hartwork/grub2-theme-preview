@@ -21,6 +21,7 @@ from .which import which
 
 _PATH_IMAGE_ONLY = 'themes/DEMO.png'
 _PATH_FULL_THEME = 'themes/DEMO'
+_GRUB2_PLATFORM = 'i386-pc'
 
 _KILL_BY_SIGNAL = 128
 
@@ -229,6 +230,10 @@ def _ignore_oserror(func, *args, **kwargs):
         pass
 
 
+def _grub2_directory(platform):
+    return  '/usr/lib/grub/%s' % platform
+
+
 def _inner_main(options):
     for command, package in (
             (options.grub2_mkrescue, 'Grub 2.x'),
@@ -268,6 +273,7 @@ def _inner_main(options):
             abs_tmp_img_file = os.path.join(abs_tmp_folder, 'grub2_theme_demo.img')
             assemble_cmd = [
                 options.grub2_mkrescue,
+                '--directory=%s' % _grub2_directory(_GRUB2_PLATFORM),
                 '--xorriso', options.xorriso,
                 '--output', abs_tmp_img_file,
                 ]
