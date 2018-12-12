@@ -14,6 +14,7 @@ import subprocess
 import sys
 import tempfile
 import traceback
+import platform
 
 from .version import VERSION_STR
 from .which import which
@@ -21,7 +22,6 @@ from .which import which
 
 _PATH_IMAGE_ONLY = 'themes/DEMO.png'
 _PATH_FULL_THEME = 'themes/DEMO'
-_GRUB2_PLATFORM = 'i386-pc'
 
 _KILL_BY_SIGNAL = 128
 
@@ -234,6 +234,18 @@ def _grub2_directory(platform):
     return  '/usr/lib/grub/%s' % platform
 
 
+def _grub2_platform():
+    if os.path.exists('/sys/firmware/efi'):
+        _cpu = platform.machine()
+        _platform = 'efi'
+    else:
+        # for BIOS-based machines
+        # https://www.gnu.org/software/grub/manual/grub/grub.html#Installation
+        _cpu = 'i386'
+        _platform = 'pc'
+    return '%s-%s' % (_cpu, _platform)
+
+
 def _inner_main(options):
     for command, package in (
             (options.grub2_mkrescue, 'Grub 2.x'),
@@ -269,7 +281,7 @@ def _inner_main(options):
         with open(abs_tmp_grub_cfg_file, 'w') as f:
             f.write(grub_cfg_content)
 
-        grub2_platform_directory = _grub2_directory(_GRUB2_PLATFORM)
+        grub2_platform_directory = _grub2_directory(_grub2_platform())
         if not os.path.exists(grub2_platform_directory):
             raise OSError(errno.ENOENT, 'GRUB platform directory "%s" not found' % grub2_platform_directory)
 
