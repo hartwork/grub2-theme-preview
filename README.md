@@ -25,9 +25,9 @@ To install from a Git clone _for development_:
 
 Please make sure to install these _non-PyPI dependencies_ as well:
  - `grub2-mkrescue` (can be installed as `grub-mkrescue` on some systems)
- - [QEMU](http://wiki.qemu.org/Main_Page) — _hypervisor that performs hardware virtualization_
+ - [QEMU](https://wiki.qemu.org/Main_Page) — _hypervisor that performs hardware virtualization_
  - [mtools](https://www.gnu.org/software/mtools/) — _collection of utilities to access MS-DOS_
- - [libisoburn](http://libburnia-project.org/) — _frontend which enables creation and expansion of the ISO format_
+ - [libisoburn](https://dev.lovelyhq.com/libburnia/libisoburn) — _frontend which enables creation and expansion of the ISO format_
 
 
 ## Usage
