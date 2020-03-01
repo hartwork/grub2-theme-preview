@@ -9,11 +9,21 @@ creates a temporary bootable image using `grub2-mkrescue` and launches
 that image in a virtual machine using KVM/QEMU, all without root privileges.
 
 
-## Install
+## Installation
 
-Run `make install` with root privileges.
+To install the latest release from [PyPI](https://pypi.org/):
 
-Dependencies:
+```console
+# pip install --user grub2-theme-preview
+```
+
+To install from a Git clone _for development_:
+
+```console
+# pip install --user --editable .
+```
+
+Please make sure to install these _non-PyPI dependencies_ as well:
  - `grub2-mkrescue` (can be installed as `grub-mkrescue` on some systems)
  - [QEMU](http://wiki.qemu.org/Main_Page) — _hypervisor that performs hardware virtualization_
  - [mtools](https://www.gnu.org/software/mtools/) — _collection of utilities to access MS-DOS_
