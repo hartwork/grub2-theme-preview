@@ -10,6 +10,8 @@ from grub2_theme_preview.version import VERSION_STR
 setup(
     name='grub2-theme-preview',
     description='Preview a GRUB 2.x theme using KVM/QEMU',
+    long_description=open('README.md', encoding='utf-8').read(),
+    long_description_content_type='text/markdown',
     license='GPL v2 or later',
     version=VERSION_STR,
     url='https://github.com/hartwork/grub2-theme-preview',
@@ -17,6 +19,9 @@ setup(
     author='Sebastian Pipping',
     author_email='sebastian@pipping.org',
     python_requires='>=3.6',
+    setup_requires=[
+        'setuptools>=38.6.0',  # for long_description_content_type
+    ],
     packages=find_packages(),
     entry_points={
         'console_scripts': [
