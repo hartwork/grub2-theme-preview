@@ -8,6 +8,10 @@ It takes a theme folder (or just a single picture),
 creates a temporary bootable image using `grub2-mkrescue` and launches
 that image in a virtual machine using KVM/QEMU, all without root privileges.
 
+![grub2-theme-preview showing theme "gutsblack-archlinux"](https://raw.githubusercontent.com/hartwork/grub2-theme-preview/master/screenshots/grub2-theme-preview__gutsblack-archlinux.png)
+
+(Showing theme [gutsblack-archlinux](https://forums.archlinux.fr/viewtopic.php?t=11361))
+
 
 ## Installation
 
