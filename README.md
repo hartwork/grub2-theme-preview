@@ -1,7 +1,6 @@
-About
-=====
+# About
 
-*grub2-theme-preview* came into life when I was looking around for
+**grub2-theme-preview** came into life when I was looking around for
 available GRUB 2.x themes and wanted a way to quickly see a theme
 in action without rebooting real hardware.
 
@@ -15,15 +14,15 @@ that image in a virtual machine using KVM/QEMU, all without root privileges.
 Run `make install` with root privileges.
 
 Dependencies:
- - `grub2-mkrescue` - (can be installed as `grub-mkrescue` on some systems)
- - [QEMU](http://wiki.qemu.org/Main_Page) - "... hypervisor that performs hardware virtualization"
- - [mtools](https://www.gnu.org/software/mtools/) - "... collection of utilities to access MS-DOS"
- - [libisoburn](http://libburnia-project.org/) - "frontend [...] which enables creation and expansion of the ISO format"
+ - `grub2-mkrescue` (can be installed as `grub-mkrescue` on some systems)
+ - [QEMU](http://wiki.qemu.org/Main_Page) — _hypervisor that performs hardware virtualization_
+ - [mtools](https://www.gnu.org/software/mtools/) — _collection of utilities to access MS-DOS_
+ - [libisoburn](http://libburnia-project.org/) — _frontend which enables creation and expansion of the ISO format_
 
 
 ## Usage
 
-```
+```console
 # grub2-theme-preview --help
 usage: grub2-theme-preview [-h] [--image] [--grub-cfg PATH] [--verbose]
                            [--resolution WxH] [--timeout SECONDS] [--version]
