@@ -1,8 +1,6 @@
 # Copyright (C) 2015 Sebastian Pipping <sebastian@pipping.org>
 # Licensed under GPL v2 or later
 
-from __future__ import print_function
-
 import errno
 import glob
 import os
