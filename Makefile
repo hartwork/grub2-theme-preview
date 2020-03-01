@@ -10,7 +10,6 @@ clean:
 	find -name '*.pyc' -delete
 
 dist:
-	$(RM) MANIFEST
 	$(PYTHON) setup.py sdist
 
 install:

@@ -2,7 +2,7 @@
 # Copyright (C) 2015 Sebastian Pipping <sebastian@pipping.org>
 # Licensed under GPL v2 or later
 
-from distutils.core import setup
+from setuptools import find_packages, setup
 
 from grub2_theme_preview.version import VERSION_STR
 
@@ -16,8 +16,12 @@ setup(
     download_url='https://github.com/hartwork/grub2-theme-preview/archive/%s.tar.gz' % VERSION_STR,
     author='Sebastian Pipping',
     author_email='sebastian@pipping.org',
-    packages=['grub2_theme_preview', ],
-    scripts=['grub2-theme-preview', ],
+    packages=find_packages(),
+    entry_points={
+        'console_scripts': [
+            'grub2-theme-preview = grub2_theme_preview.__main__:main',
+        ],
+    },
     classifiers=[
         'Development Status :: 4 - Beta',
         'Environment :: Console',
