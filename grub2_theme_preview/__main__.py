@@ -191,7 +191,7 @@ def iterate_pf2_files_relative(abs_theme_dir):
 
 
 def parse_command_line():
-    parser = ArgumentParser()
+    parser = ArgumentParser(prog='grub2-theme-preview')
     parser.add_argument('--image', action='store_true', help='Preview a background image rather than a whole theme')
     parser.add_argument('--grub-cfg', metavar='PATH', help='Path of custom grub.cfg file to use (default: /boot/grub{2,}/grub.cfg)')
     parser.add_argument('--verbose', default=False, action='store_true', help='Increase verbosity')
