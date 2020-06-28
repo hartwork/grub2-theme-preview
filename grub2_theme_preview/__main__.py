@@ -14,6 +14,8 @@ import tempfile
 import traceback
 import platform
 
+import distro
+
 from .version import VERSION_STR
 from .which import which
 
@@ -244,6 +246,21 @@ def _grub2_platform():
     return '%s-%s' % (_cpu, _platform)
 
 
+def _grub2_ovmf_tuple():
+    """
+    Returns (1) the absolute filename of the OVMF image to use
+    and (2) the package name (of the current distro) to install
+    if the file is missing, as a 2-tuple.
+    """
+    _DEBIAN = 'Debian'
+    distro_map = {
+        _DEBIAN: ('/usr/share/OVMF/OVMF_CODE.fd', 'ovmf'),
+        'Gentoo': ('/usr/share/edk2-ovmf/OVMF_CODE.fd', 'sys-firmware/edk2-ovmf'),
+    }
+    distro_map['Ubuntu'] = distro_map[_DEBIAN]
+    return distro_map.get(distro.name(), distro_map[_DEBIAN])
+
+
 def _inner_main(options):
     for command, package in (
             (options.grub2_mkrescue, 'Grub 2.x'),
@@ -279,9 +296,19 @@ def _inner_main(options):
         with open(abs_tmp_grub_cfg_file, 'w') as f:
             f.write(grub_cfg_content)
 
-        grub2_platform_directory = _grub2_directory(_grub2_platform())
+        grub2_platform = _grub2_platform()
+        grub2_platform_directory = _grub2_directory(grub2_platform)
         if not os.path.exists(grub2_platform_directory):
             raise OSError(errno.ENOENT, 'GRUB platform directory "%s" not found' % grub2_platform_directory)
+
+        is_efi_host = 'efi' in grub2_platform
+        if is_efi_host:
+            omvf_image_path, omvf_package_name = _grub2_ovmf_tuple()
+            if not os.path.exists(omvf_image_path):
+                raise OSError(errno.ENOENT,
+                              'OVMF image file "%s" (provided by package "%s") missing'
+                              ', please install'
+                              % (omvf_image_path, omvf_package_name))
 
         try:
             abs_tmp_img_file = os.path.join(abs_tmp_folder, 'grub2_theme_demo.img')
@@ -316,6 +343,11 @@ def _inner_main(options):
                     options.qemu,
                     '-drive', 'file=%s,index=0,media=disk,format=raw' % abs_tmp_img_file,
                     ]
+                if is_efi_host:
+                    run_command += [
+                        '-bios', omvf_image_path,
+                    ]
+
                 _run(run_command, options.verbose)
             finally:
                 _ignore_oserror(os.remove, abs_tmp_img_file)
