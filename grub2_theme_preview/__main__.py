@@ -261,6 +261,15 @@ def _grub2_ovmf_tuple():
     return distro_map.get(distro.name(), distro_map[_DEBIAN])
 
 
+def _dump_grub_cfg_content(grub_cfg_content, target):
+    bar = '>>> grub.cfg ' + '<' * 40
+    print(file=target)
+    print(bar, file=target)
+    print(grub_cfg_content, file=target)
+    print(bar, file=target)
+    print(file=target)
+
+
 def _inner_main(options):
     for command, package in (
             (options.grub2_mkrescue, 'Grub 2.x'),
@@ -289,6 +298,8 @@ def _inner_main(options):
             font_files_to_load,
             options.timeout_seconds,
             )
+    if options.debug:
+        _dump_grub_cfg_content(grub_cfg_content, target=sys.stderr)
 
     abs_tmp_folder = tempfile.mkdtemp()
     try:
