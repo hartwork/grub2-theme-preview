@@ -39,7 +39,7 @@ Please make sure to install these _non-PyPI dependencies_ as well:
 
 ```console
 # grub2-theme-preview --help
-usage: grub2-theme-preview [-h] [--image] [--grub-cfg PATH] [--verbose]
+usage: grub2-theme-preview [-h] [--grub-cfg PATH] [--verbose]
                            [--resolution WxH] [--timeout SECONDS] [--version]
                            [--grub2-mkrescue COMMAND] [--qemu COMMAND]
                            [--xorriso COMMAND] [--debug]
@@ -47,11 +47,11 @@ usage: grub2-theme-preview [-h] [--image] [--grub-cfg PATH] [--verbose]
                            PATH
 
 positional arguments:
-  PATH                  Path of theme directory (or image file) to preview
+  PATH                  Path of theme directory (or PNG/TGA image file) to
+                        preview
 
 optional arguments:
   -h, --help            show this help message and exit
-  --image               Preview a background image rather than a whole theme
   --grub-cfg PATH       Path of custom grub.cfg file to use (default:
                         /boot/grub{2,}/grub.cfg)
   --verbose             Increase verbosity
