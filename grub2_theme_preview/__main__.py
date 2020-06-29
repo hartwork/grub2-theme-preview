@@ -252,7 +252,7 @@ def _grub2_ovmf_tuple():
     and (2) the package name (of the current distro) to install
     if the file is missing, as a 2-tuple.
     """
-    _DEBIAN = 'Debian'
+    _DEBIAN = 'Debian GNU/Linux'
     distro_map = {
         'Arch Linux': ('/usr/share/edk2-ovmf/x64/OVMF_CODE.fd', 'edk2-ovmf'),
         _DEBIAN: ('/usr/share/OVMF/OVMF_CODE.fd', 'ovmf'),
