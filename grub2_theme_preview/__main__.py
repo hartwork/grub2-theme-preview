@@ -6,6 +6,7 @@ import glob
 import os
 import re
 from argparse import ArgumentParser
+from enum import Enum
 from textwrap import dedent
 import signal
 import subprocess
@@ -20,7 +21,8 @@ from .version import VERSION_STR
 from .which import which
 
 
-_PATH_IMAGE_ONLY = 'themes/DEMO.png'
+_PATH_IMAGE_ONLY_PNG = 'themes/DEMO.png'
+_PATH_IMAGE_ONLY_TGA = 'themes/DEMO.tga'
 _PATH_FULL_THEME = 'themes/DEMO'
 
 _KILL_BY_SIGNAL = 128
@@ -36,6 +38,27 @@ class _CommandNotFoundException(Exception):
             return 'Command "%s" not found' % self._command
         else:
             return 'Command "%s" of %s not found' % (self._command, self._package)
+
+
+class _SourceType(Enum):
+    DIRECTORY = 1
+    FILE_PNG = 2
+    FILE_TGA = 3
+
+
+def _classify_source(abspath_source):
+    abspath_source_lower = abspath_source.lower()
+    if abspath_source_lower.endswith('.tga'):
+        return _SourceType.FILE_TGA
+    elif abspath_source_lower.endswith('.png'):
+        return _SourceType.FILE_PNG
+    return _SourceType.DIRECTORY
+
+
+def _get_image_path_for(source_type):
+    if source_type == _SourceType.FILE_TGA:
+        return _PATH_IMAGE_ONLY_TGA
+    return _PATH_IMAGE_ONLY_PNG
 
 
 def _mkdir_if_missing(path):
@@ -87,7 +110,7 @@ def _make_menu_entries():
             """)
 
 
-def _make_grub_cfg_load_our_theme(grub_cfg_content, is_full_theme, resolution_or_none, font_files_to_load, timeout_seconds):
+def _make_grub_cfg_load_our_theme(grub_cfg_content, source_type, resolution_or_none, font_files_to_load, timeout_seconds):
     # NOTE: The last font loaded becomes the default/fallback font
     #       So if we load fonts first, the remaining default font
     #       will remain unchanged and the theme will display unchanged.
@@ -102,6 +125,7 @@ def _make_grub_cfg_load_our_theme(grub_cfg_content, is_full_theme, resolution_or
             'insmod all_video',
             'insmod gfxterm',
             'insmod png',
+            'insmod tga',
             ]
 
     if resolution_or_none is not None:
@@ -122,15 +146,15 @@ def _make_grub_cfg_load_our_theme(grub_cfg_content, is_full_theme, resolution_or
         # so it's done at least once
         epilog_chunks.append('terminal_output gfxterm')
 
-    if is_full_theme:
+    if source_type == _SourceType.DIRECTORY:
         epilog_chunks.append('set theme=$prefix/%s/theme.txt' % _PATH_FULL_THEME)
     else:
-        epilog_chunks.append('background_image $prefix/%s' % _PATH_IMAGE_ONLY)
+        epilog_chunks.append('background_image $prefix/%s' % _get_image_path_for(source_type))
 
     return '\n'.join(prolog_chunks) + grub_cfg_content + '\n'.join(epilog_chunks)
 
 
-def _make_final_grub_cfg_content(is_full_theme, source_grub_cfg, resolution_or_none, font_files_to_load, timeout_seconds):
+def _make_final_grub_cfg_content(source_type, source_grub_cfg, resolution_or_none, font_files_to_load, timeout_seconds):
     if source_grub_cfg is not None:
         files_to_try_to_read = [source_grub_cfg]
         fail_if_missing = True
@@ -160,7 +184,7 @@ def _make_final_grub_cfg_content(is_full_theme, source_grub_cfg, resolution_or_n
         print('INFO: Could not read external GRUB config file, falling back to internal example config')
         content = _make_menu_entries()
 
-    return _make_grub_cfg_load_our_theme(content, is_full_theme, resolution_or_none, font_files_to_load, timeout_seconds)
+    return _make_grub_cfg_load_our_theme(content, source_type, resolution_or_none, font_files_to_load, timeout_seconds)
 
 
 def resolution(text):
@@ -194,13 +218,12 @@ def iterate_pf2_files_relative(abs_theme_dir):
 
 def parse_command_line():
     parser = ArgumentParser(prog='grub2-theme-preview')
-    parser.add_argument('--image', action='store_true', help='Preview a background image rather than a whole theme')
     parser.add_argument('--grub-cfg', metavar='PATH', help='Path of custom grub.cfg file to use (default: /boot/grub{2,}/grub.cfg)')
     parser.add_argument('--verbose', default=False, action='store_true', help='Increase verbosity')
     parser.add_argument('--resolution', metavar='WxH', type=resolution, help='Set a custom resolution, e.g. 800x600')
     parser.add_argument('--timeout', metavar='SECONDS', dest='timeout_seconds', type=timeout, default=30,
             help='Set timeout in whole seconds or -1 to disable (default: %(default)s seconds)')
-    parser.add_argument('source', metavar='PATH', help='Path of theme directory (or image file) to preview')
+    parser.add_argument('source', metavar='PATH', help='Path of theme directory (or PNG/TGA image file) to preview')
     parser.add_argument('--version', action='version', version='%(prog)s ' + VERSION_STR)
 
     commands = parser.add_argument_group('command location arguments')
@@ -287,14 +310,16 @@ def _inner_main(options):
 
     normalized_source = os.path.normpath(os.path.abspath(options.source))
 
-    if options.image:
+    source_type = _classify_source(options.source)
+
+    if source_type != _SourceType.DIRECTORY:
         font_files_to_load = []
     else:
         font_files_to_load = list(iterate_pf2_files_relative(normalized_source))
 
     abs_grub_cfg_or_none = options.grub_cfg and os.path.abspath(options.grub_cfg)
     grub_cfg_content = _make_final_grub_cfg_content(
-            not options.image,
+            source_type,
             abs_grub_cfg_or_none,
             options.resolution,
             font_files_to_load,
@@ -336,9 +361,9 @@ def _inner_main(options):
                 assemble_cmd.append('boot/grub/grub.cfg=%s' % abs_tmp_grub_cfg_file)
 
             try:
-                if options.image:
+                if source_type != _SourceType.DIRECTORY:
                     assemble_cmd += [
-                        'boot/grub/%s=%s' % (_PATH_IMAGE_ONLY, normalized_source),
+                        'boot/grub/%s=%s' % (_get_image_path_for(source_type), normalized_source),
                         ]
                 else:
                     assemble_cmd += [
