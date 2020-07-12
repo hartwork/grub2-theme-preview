@@ -380,7 +380,7 @@ def _inner_main(options):
                 run_command = [
                     options.qemu,
                     '-drive', 'file=%s,index=0,media=disk,format=raw' % abs_tmp_img_file,
-                    ]
+                ]
                 if is_efi_host:
                     run_command += [
                         '-bios', omvf_image_path,
