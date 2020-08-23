@@ -375,8 +375,6 @@ def _inner_main(options):
                     command = os.path.basename(options.grub2_mkrescue)
                     raise OSError(errno.ENOENT, '%s failed to create the rescue image' % command)
 
-                print('INFO: Please give GRUB a moment to show up in QEMU...')
-
                 run_command = [
                     options.qemu,
                     '-m', '256',
@@ -386,6 +384,8 @@ def _inner_main(options):
                     run_command += [
                         '-bios', omvf_image_path,
                     ]
+
+                print('INFO: Please give GRUB a moment to show up in QEMU...')
 
                 _run(run_command, options.verbose)
             finally:
