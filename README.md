@@ -42,7 +42,7 @@ Please make sure to install these _non-PyPI dependencies_ as well:
 usage: grub2-theme-preview [-h] [--grub-cfg PATH] [--verbose]
                            [--resolution WxH] [--timeout SECONDS] [--version]
                            [--grub2-mkrescue COMMAND] [--qemu COMMAND]
-                           [--xorriso COMMAND] [--debug]
+                           [--xorriso COMMAND] [--no-kvm] [--debug]
                            [--plain-rescue-image]
                            PATH
 
@@ -65,6 +65,11 @@ command location arguments:
                         grub2-mkrescue command (default: grub-mkrescue)
   --qemu COMMAND        KVM/QEMU command (default: qemu-system-<machine>)
   --xorriso COMMAND     xorriso command (default: xorriso)
+
+arguments related to invokation of QEMU/KVM:
+  --no-kvm              Do not pass -enable-kvm to QEMU (and hence fall back
+                        to acceleration "tcg" which is significantly slower
+                        than KVM)
 
 debugging arguments:
   --debug               Enable debugging output
