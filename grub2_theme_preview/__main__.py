@@ -231,6 +231,10 @@ def parse_command_line():
     commands.add_argument('--qemu', metavar='COMMAND', help='KVM/QEMU command (default: qemu-system-<machine>)')
     commands.add_argument('--xorriso', default='xorriso', metavar='COMMAND', help='xorriso command (default: %(default)s)')
 
+    qemu = parser.add_argument_group('arguments related to invokation of QEMU/KVM')
+    qemu.add_argument('--no-kvm', dest='enable_kvm', default=True, action='store_false',
+                      help='Do not pass -enable-kvm to QEMU (and hence fall back to acceleration "tcg" which is significantly slower than KVM)')
+
     debugging = parser.add_argument_group('debugging arguments')
     debugging.add_argument('--debug', default=False, action='store_true', help='Enable debugging output')
     debugging.add_argument('--plain-rescue-image', default=False, action='store_true',
@@ -375,17 +379,19 @@ def _inner_main(options):
                     command = os.path.basename(options.grub2_mkrescue)
                     raise OSError(errno.ENOENT, '%s failed to create the rescue image' % command)
 
-                print('INFO: Please give GRUB a moment to show up in QEMU...')
-
                 run_command = [
                     options.qemu,
                     '-m', '256',
                     '-drive', 'file=%s,index=0,media=disk,format=raw' % abs_tmp_img_file,
                 ]
+                if options.enable_kvm:
+                    run_command.append('-enable-kvm')
                 if is_efi_host:
                     run_command += [
                         '-bios', omvf_image_path,
                     ]
+
+                print('INFO: Please give GRUB a moment to show up in QEMU...')
 
                 _run(run_command, options.verbose)
             finally:
