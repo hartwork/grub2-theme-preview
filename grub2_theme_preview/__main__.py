@@ -299,6 +299,14 @@ def _dump_grub_cfg_content(grub_cfg_content, target):
     print(file=target)
 
 
+def _require_recursive_read_access_at(abs_path):
+    for root, directories, files in os.walk(abs_path):
+        for basename in directories + files:
+            abs_path = os.path.join(root, basename)
+            if not os.access(abs_path, os.R_OK):
+                raise IOError(errno.EACCES, 'Permission denied: \'%s\'' % abs_path)
+
+
 def _inner_main(options):
     for command, package in (
             (options.grub2_mkrescue, 'Grub 2.x'),
@@ -362,6 +370,18 @@ def _inner_main(options):
                 ]
 
             if not options.plain_rescue_image:
+                # Add boot loader entry files read by GRUB's blscfg command, e.g. on recent Fedora
+                abs_boot_loader_path = '/boot/loader/'
+                if os.path.exists(abs_boot_loader_path):
+                    try:
+                        _require_recursive_read_access_at(abs_boot_loader_path)
+                    except IOError as e:
+                        print('INFO: %s' % str(e))
+                        print('INFO: Files at "%s" will NOT be added to the GRUB rescue image.'
+                              % abs_boot_loader_path)
+                    else:
+                        assemble_cmd.append('boot/loader=' + abs_boot_loader_path)
+
                 assemble_cmd.append('boot/grub/grub.cfg=%s' % abs_tmp_grub_cfg_file)
 
             try:
