@@ -89,7 +89,7 @@ def _run(cmd, verbose):
             stdout.close()
 
 
-def _make_menu_entries():
+def _generate_dummy_menu_entries():
     return dedent("""\
             menuentry 'Debian' --class debian --class gnu-linux --class linux --class gnu --class os {
                 reboot
@@ -101,11 +101,6 @@ def _make_menu_entries():
 
             menuentry "Memtest86+" {
                 reboot
-            }
-
-            submenu 'Reboot / Shutdown' {
-                menuentry Reboot { reboot }
-                menuentry Shutdown { halt }
             }
             """)
 
@@ -134,10 +129,18 @@ def _make_grub_cfg_load_our_theme(grub_cfg_content, source_type, resolution_or_n
         prolog_chunks.append('set gfxmode=%dx%d' % resolution_or_none)
         prolog_chunks.append('terminal_output gfxterm')
 
+    prolog_chunks.append('')  # blank line
     prolog_chunks.append('')  # trailing new line
 
     epilog_chunks = [
-            '',  # leading new line
+            # Ensure that we always have one or more menu entries
+            '',
+            'submenu \'Reboot / Shutdown\' {',
+            '    menuentry Reboot { reboot }',
+            '    menuentry Shutdown { halt }',
+            '}',
+
+            '',
             'set timeout=%d' % timeout_seconds,
             ]
 
@@ -182,7 +185,7 @@ def _make_final_grub_cfg_content(source_type, source_grub_cfg, resolution_or_non
             break
     else:
         print('INFO: Could not read external GRUB config file, falling back to internal example config')
-        content = _make_menu_entries()
+        content = _generate_dummy_menu_entries()
 
     return _make_grub_cfg_load_our_theme(content, source_type, resolution_or_none, font_files_to_load, timeout_seconds)
 
