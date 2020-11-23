@@ -141,6 +141,7 @@ def _make_grub_cfg_load_our_theme(grub_cfg_content, source_type, resolution_or_n
             '}',
 
             '',
+            'set default=0',  # i.e. move cursor to first entry
             'set timeout=%d' % timeout_seconds,
             ]
 
