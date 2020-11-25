@@ -23,6 +23,7 @@ from .which import which
 
 _PATH_IMAGE_ONLY_PNG = 'themes/DEMO.png'
 _PATH_IMAGE_ONLY_TGA = 'themes/DEMO.tga'
+_PATH_IMAGE_ONLY_JPEG = 'themes/DEMO.jpeg'
 _PATH_FULL_THEME = 'themes/DEMO'
 
 _KILL_BY_SIGNAL = 128
@@ -44,6 +45,7 @@ class _SourceType(Enum):
     DIRECTORY = 1
     FILE_PNG = 2
     FILE_TGA = 3
+    FILE_JPEG = 4
 
 
 def _classify_source(abspath_source):
@@ -52,12 +54,18 @@ def _classify_source(abspath_source):
         return _SourceType.FILE_TGA
     elif abspath_source_lower.endswith('.png'):
         return _SourceType.FILE_PNG
+    elif abspath_source_lower.endswith('.jpeg'):
+        return _SourceType.FILE_JPEG
+    elif abspath_source_lower.endswith('.jpg'):
+        return _SourceType.FILE_JPEG
     return _SourceType.DIRECTORY
 
 
 def _get_image_path_for(source_type):
     if source_type == _SourceType.FILE_TGA:
         return _PATH_IMAGE_ONLY_TGA
+    elif source_type == _SourceType.FILE_JPEG:
+        return _PATH_IMAGE_ONLY_JPEG
     return _PATH_IMAGE_ONLY_PNG
 
 
@@ -121,6 +129,7 @@ def _make_grub_cfg_load_our_theme(grub_cfg_content, source_type, resolution_or_n
             'insmod gfxterm',
             'insmod png',
             'insmod tga',
+            'insmod jpeg',
             ]
 
     if resolution_or_none is not None:
