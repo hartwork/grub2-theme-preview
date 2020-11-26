@@ -164,6 +164,13 @@ def _make_grub_cfg_load_our_theme(grub_cfg_content, source_type, resolution_or_n
     else:
         epilog_chunks.append('background_image $prefix/%s' % _get_image_path_for(source_type))
 
+    # Make sure that lines like "set root='hd0,msdos1'" do not get us
+    # into unnecessary "unknown filesystem" error situations
+    grub_cfg_content = re.sub('^([ \\t]*set root=)(.+)',
+                              "\\1'hd0'  # replaced by grub2-theme-preview, was \\2",
+                              grub_cfg_content,
+                              flags=re.MULTILINE)
+
     return '\n'.join(prolog_chunks) + grub_cfg_content + '\n'.join(epilog_chunks)
 
 
