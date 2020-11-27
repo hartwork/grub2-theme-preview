@@ -62,7 +62,7 @@ optional arguments:
 
 command location arguments:
   --grub2-mkrescue COMMAND
-                        grub2-mkrescue command (default: grub-mkrescue)
+                        grub2-mkrescue command (default: auto-detect)
   --qemu COMMAND        KVM/QEMU command (default: qemu-system-<machine>)
   --xorriso COMMAND     xorriso command (default: xorriso)
 
