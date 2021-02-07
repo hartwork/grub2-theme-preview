@@ -308,15 +308,15 @@ def _grub2_ovmf_tuple():
     if the file is missing, as a 2-tuple.
     """
     _DEBIAN = 'Debian GNU/Linux'
-    _Arch_Linux = 'Arch Linux'
+    _ARCH_LINUX = 'Arch Linux'
     distro_map = {
-        _Arch_Linux: ('/usr/share/edk2-ovmf/x64/OVMF_CODE.fd', 'edk2-ovmf'),
+        _ARCH_LINUX: ('/usr/share/edk2-ovmf/x64/OVMF_CODE.fd', 'edk2-ovmf'),
         _DEBIAN: ('/usr/share/OVMF/OVMF_CODE.fd', 'ovmf'),
         'Fedora': ('/usr/share/edk2/ovmf/OVMF_CODE.fd', 'edk2-ovmf'),
         'Gentoo': ('/usr/share/edk2-ovmf/OVMF_CODE.fd', 'sys-firmware/edk2-ovmf'),
     }
     distro_map['Ubuntu'] = distro_map[_DEBIAN]
-    distro_map['Manjaro Linux'] = distro_map[_Arch_Linux]
+    distro_map['Manjaro Linux'] = distro_map[_ARCH_LINUX]
     return distro_map.get(distro.name(), distro_map[_DEBIAN])
 
 
