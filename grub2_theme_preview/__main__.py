@@ -15,8 +15,6 @@ import tempfile
 import traceback
 import platform
 
-import distro
-
 from .version import VERSION_STR
 from .which import which
 
@@ -303,21 +301,22 @@ def _grub2_platform():
 
 def _grub2_ovmf_tuple():
     """
-    Returns (1) the absolute filename of the OVMF image to use
-    and (2) the package name (of the current distro) to install
-    if the file is missing, as a 2-tuple.
+    Returns a 3-tuple with:
+    1. the absolute filename of the OVMF image to use or None if missing
+    2. a display hint for humans where the file is located, roughly
+    3. a list of package names to try install, potentially
     """
-    _DEBIAN = 'Debian GNU/Linux'
-    _ARCH_LINUX = 'Arch Linux'
-    distro_map = {
-        _ARCH_LINUX: ('/usr/share/edk2-ovmf/x64/OVMF_CODE.fd', 'edk2-ovmf'),
-        _DEBIAN: ('/usr/share/OVMF/OVMF_CODE.fd', 'ovmf'),
-        'Fedora': ('/usr/share/edk2/ovmf/OVMF_CODE.fd', 'edk2-ovmf'),
-        'Gentoo': ('/usr/share/edk2-ovmf/OVMF_CODE.fd', 'sys-firmware/edk2-ovmf'),
-    }
-    distro_map['Ubuntu'] = distro_map[_DEBIAN]
-    distro_map['Manjaro Linux'] = distro_map[_ARCH_LINUX]
-    return distro_map.get(distro.name(), distro_map[_DEBIAN])
+    candidates = [
+        '/usr/share/edk2-ovmf/OVMF_CODE.fd',  # Gentoo and its derivatives
+        '/usr/share/edk2-ovmf/x64/OVMF_CODE.fd',  # Arch Linux and its derivatives
+        '/usr/share/OVMF/OVMF_CODE.fd',  # Debian and its derivatives
+        '/usr/share/edk2/ovmf/OVMF_CODE.fd',  # Fedora (and its derivatives?)
+    ]
+    for candidate in candidates:
+        if os.path.exists(candidate):
+            return candidate, None, []
+    else:
+        return None, '/usr/share/[..]/OVMF_CODE.fd', ['edk2-ovmf', 'ovmf']
 
 
 def _dump_grub_cfg_content(grub_cfg_content, target):
@@ -383,12 +382,15 @@ def _inner_main(options):
 
         is_efi_host = 'efi' in grub2_platform
         if is_efi_host:
-            omvf_image_path, omvf_package_name = _grub2_ovmf_tuple()
-            if not os.path.exists(omvf_image_path):
+            omvf_image_path, omvf_image_path_hint, omvf_candidate_package_names = _grub2_ovmf_tuple()
+            if omvf_image_path is None:
+                package_names_hint = ' or '.join(repr(package_name)
+                                                 for package_name
+                                                 in omvf_candidate_package_names)
                 raise OSError(errno.ENOENT,
-                              'OVMF image file "%s" (provided by package "%s") missing'
-                              ', please install'
-                              % (omvf_image_path, omvf_package_name))
+                              'OVMF image file "%s" is missing, please install package %s.'
+                              % (omvf_image_path_hint, package_names_hint))
+            print(f'INFO: Found OVMF image at {omvf_image_path!r}.')
 
         try:
             abs_tmp_img_file = os.path.join(abs_tmp_folder, 'grub2_theme_demo.img')
