@@ -234,6 +234,15 @@ def iterate_pf2_files_relative(abs_theme_dir):
             yield relative_path
 
 
+def validate_grub2_mkrescue_addition(candidate: str) -> str:
+    if not '=/' in candidate:
+        raise ValueError
+    return candidate
+
+# This string is picked up by argparse error message generator:
+validate_grub2_mkrescue_addition.__name__ = 'grub2-mkrescue addition'
+
+
 def parse_command_line():
     parser = ArgumentParser(prog='grub2-theme-preview')
     parser.add_argument('--grub-cfg', metavar='PATH', help='Path of custom grub.cfg file to use (default: /boot/grub{2,}/grub.cfg)')
@@ -241,6 +250,9 @@ def parse_command_line():
     parser.add_argument('--resolution', metavar='WxH', type=resolution, help='Set a custom resolution, e.g. 800x600')
     parser.add_argument('--timeout', metavar='SECONDS', dest='timeout_seconds', type=timeout, default=30,
             help='Set timeout in whole seconds or -1 to disable (default: %(default)s seconds)')
+    parser.add_argument('--add', action='append', dest='addition_requests', metavar='TARGET=/SOURCE', type=validate_grub2_mkrescue_addition,
+                        help=('make grub2-mkrescue add file(s) from /SOURCE to /TARGET in the rescue image'
+                              ' (can be passed multiple times)'))
     parser.add_argument('source', metavar='PATH', help='Path of theme directory (or PNG/TGA image file) to preview')
     parser.add_argument('--version', action='version', version='%(prog)s ' + VERSION_STR)
 
@@ -424,6 +436,8 @@ def _inner_main(options):
                 assemble_cmd += [
                     'boot/grub/%s/=%s' % (_PATH_FULL_THEME, normalized_source),
                     ]
+
+            assemble_cmd += options.addition_requests
 
             try:
                 _run(assemble_cmd, options.verbose)
