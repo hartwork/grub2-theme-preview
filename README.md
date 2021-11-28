@@ -47,17 +47,16 @@ usage: grub2-theme-preview [-h] [--grub-cfg PATH] [--verbose]
                            PATH
 
 positional arguments:
-  PATH                  Path of theme directory (or PNG/TGA image file) to
-                        preview
+  PATH                  Path of theme directory (or PNG/TGA image file) to preview
 
 optional arguments:
   -h, --help            show this help message and exit
-  --grub-cfg PATH       Path of custom grub.cfg file to use (default:
-                        /boot/grub{2,}/grub.cfg)
+  --grub-cfg PATH       Path of custom grub.cfg file to use (default: /boot/grub{2,}/grub.cfg)
   --verbose             Increase verbosity
   --resolution WxH      Set a custom resolution, e.g. 800x600
-  --timeout SECONDS     Set timeout in whole seconds or -1 to disable
-                        (default: 30 seconds)
+  --timeout SECONDS     Set timeout in whole seconds or -1 to disable (default: 30 seconds)
+  --add TARGET=/SOURCE  make grub2-mkrescue add file(s) from /SOURCE to /TARGET in the rescue image
+                        (can be passed multiple times)
   --version             show program's version number and exit
 
 command location arguments:
