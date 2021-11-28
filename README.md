@@ -40,7 +40,8 @@ Please make sure to install these _non-PyPI dependencies_ as well:
 ```console
 # grub2-theme-preview --help
 usage: grub2-theme-preview [-h] [--grub-cfg PATH] [--verbose]
-                           [--resolution WxH] [--timeout SECONDS] [--version]
+                           [--resolution WxH] [--timeout SECONDS]
+                           [--add TARGET=/SOURCE] [--version]
                            [--grub2-mkrescue COMMAND] [--qemu COMMAND]
                            [--xorriso COMMAND] [--no-kvm] [--debug]
                            [--plain-rescue-image]
@@ -58,6 +59,9 @@ optional arguments:
   --resolution WxH      Set a custom resolution, e.g. 800x600
   --timeout SECONDS     Set timeout in whole seconds or -1 to disable
                         (default: 30 seconds)
+  --add TARGET=/SOURCE  make grub2-mkrescue add file(s) from /SOURCE to
+                        /TARGET in the rescue image (can be passed multiple
+                        times)
   --version             show program's version number and exit
 
 command location arguments:
