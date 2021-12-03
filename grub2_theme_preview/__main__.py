@@ -250,7 +250,7 @@ def parse_command_line():
     parser.add_argument('--resolution', metavar='WxH', type=resolution, help='Set a custom resolution, e.g. 800x600')
     parser.add_argument('--timeout', metavar='SECONDS', dest='timeout_seconds', type=timeout, default=30,
             help='Set timeout in whole seconds or -1 to disable (default: %(default)s seconds)')
-    parser.add_argument('--add', action='append', dest='addition_requests', metavar='TARGET=/SOURCE', type=validate_grub2_mkrescue_addition,
+    parser.add_argument('--add', default=[], action='append', dest='addition_requests', metavar='TARGET=/SOURCE', type=validate_grub2_mkrescue_addition,
                         help=('make grub2-mkrescue add file(s) from /SOURCE to /TARGET in the rescue image'
                               ' (can be passed multiple times)'))
     parser.add_argument('source', metavar='PATH', help='Path of theme directory (or PNG/TGA image file) to preview')
