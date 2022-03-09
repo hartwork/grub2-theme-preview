@@ -35,7 +35,7 @@ class _CommandNotFoundException(Exception):
         if self._package is None:
             return 'Command "%s" not found' % self._command
         else:
-            return 'Command "%s" of %s not found' % (self._command, self._package)
+            return f'Command "{self._command}" of {self._package} not found'
 
 
 class _SourceType(Enum):
@@ -119,7 +119,7 @@ def _make_grub_cfg_load_our_theme(grub_cfg_content, source_type, resolution_or_n
             ]
 
     for relative_path in font_files_to_load:
-        prolog_chunks.append('loadfont $prefix/%s/%s' % (_PATH_FULL_THEME, relative_path))
+        prolog_chunks.append(f'loadfont $prefix/{_PATH_FULL_THEME}/{relative_path}')
 
     prolog_chunks += [
             'insmod all_video',
@@ -190,10 +190,10 @@ def _make_final_grub_cfg_content(source_type, source_grub_cfg, resolution_or_non
             continue
 
         try:
-            f = open(candidate, 'r')
+            f = open(candidate)
             content = f.read()
             f.close()
-        except IOError as e:
+        except OSError as e:
             print('INFO: %s' % str(e))
         else:
             break
@@ -307,7 +307,7 @@ def _grub2_platform():
         # https://www.gnu.org/software/grub/manual/grub/grub.html#Installation
         _cpu = 'i386'
         _platform = 'pc'
-    return '%s-%s' % (_cpu, _platform)
+    return f'{_cpu}-{_platform}'
 
 
 def _grub2_ovmf_tuple():
@@ -344,7 +344,7 @@ def _require_recursive_read_access_at(abs_path):
         for basename in directories + files:
             abs_path = os.path.join(root, basename)
             if not os.access(abs_path, os.R_OK):
-                raise IOError(errno.EACCES, 'Permission denied: \'%s\'' % abs_path)
+                raise OSError(errno.EACCES, 'Permission denied: \'%s\'' % abs_path)
 
 
 def _inner_main(options):
@@ -418,7 +418,7 @@ def _inner_main(options):
                 if os.path.exists(abs_boot_loader_path):
                     try:
                         _require_recursive_read_access_at(abs_boot_loader_path)
-                    except IOError as e:
+                    except OSError as e:
                         print('INFO: %s' % str(e))
                         print('INFO: Files at "%s" will NOT be added to the GRUB rescue image.'
                               % abs_boot_loader_path)
@@ -429,11 +429,11 @@ def _inner_main(options):
 
             if source_type != _SourceType.DIRECTORY:
                 assemble_cmd += [
-                    'boot/grub/%s=%s' % (_get_image_path_for(source_type), normalized_source),
+                    f'boot/grub/{_get_image_path_for(source_type)}={normalized_source}',
                     ]
             else:
                 assemble_cmd += [
-                    'boot/grub/%s/=%s' % (_PATH_FULL_THEME, normalized_source),
+                    f'boot/grub/{_PATH_FULL_THEME}/={normalized_source}',
                     ]
 
             assemble_cmd += options.addition_requests
