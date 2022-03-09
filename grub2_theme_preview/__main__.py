@@ -294,6 +294,12 @@ def parse_command_line():
                           help='xorriso command (default: %(default)s)')
 
     qemu = parser.add_argument_group('arguments related to invokation of QEMU/KVM')
+    qemu.add_argument('--display',
+                      dest='qemu_display',
+                      metavar='DISPLAY',
+                      help='pass "-display DISPLAY" to QEMU, see "man qemu" for details'
+                      ' (default: use QEMU\'s default display)')
+
     qemu.add_argument('--no-kvm',
                       dest='enable_kvm',
                       default=True,
@@ -501,6 +507,8 @@ def _inner_main(options):
                 ]
                 if options.enable_kvm:
                     run_command.append('-enable-kvm')
+                if options.qemu_display is not None:
+                    run_command += ['-display', options.qemu_display]
                 if is_efi_host:
                     run_command += [
                         '-bios',
