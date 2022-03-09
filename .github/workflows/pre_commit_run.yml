@@ -1,0 +1,37 @@
+# Copyright (c) 2022 Sebastian Pipping <sebastian@pipping.org>
+# Licensed under GPL v2 or later
+
+name: Run pre-commit on all files
+
+on:
+- pull_request
+- push
+
+jobs:
+  run_pre_commit:
+    name: Run pre-commit on all files
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python 3.8
+        uses: actions/setup-python@v3
+        with:
+          python-version: 3.8
+
+      - name: Install pre-commit
+        run: |-
+          pip install \
+            --disable-pip-version-check \
+            --user \
+            --no-warn-script-location \
+            pre-commit
+          echo "PATH=${HOME}/.local/bin:${PATH}" >> "${GITHUB_ENV}"
+
+      - name: Install pre-commit hooks
+        run: |-
+          pre-commit install --install-hooks
+
+      - name: Run pre-commit on all files
+        run: |-
+          pre-commit run --all-files
