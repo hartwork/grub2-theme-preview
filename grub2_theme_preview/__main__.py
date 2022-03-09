@@ -85,7 +85,7 @@ def _run(cmd, verbose):
         stdout = open('/dev/null', 'w')
 
     try:
-        subprocess.call(cmd, stdout=stdout, stderr=stdout)
+        return subprocess.call(cmd, stdout=stdout, stderr=stdout)
     except OSError as e:
         if e.errno != errno.ENOENT:
             raise
@@ -517,7 +517,10 @@ def _inner_main(options):
 
                 print('INFO: Please give GRUB a moment to show up in QEMU...')
 
-                _run(run_command, options.verbose)
+                qemu_exit_code = _run(run_command, options.verbose)
+
+                if qemu_exit_code not in (0, _KILL_BY_SIGNAL + signal.SIGINT):
+                    raise RuntimeError(f'QEMU exited with code {qemu_exit_code}.')
             finally:
                 _ignore_oserror(os.remove, abs_tmp_img_file)
         finally:
