@@ -6,7 +6,6 @@ from setuptools import find_packages, setup
 
 from grub2_theme_preview.version import VERSION_STR
 
-
 setup(
     name='grub2-theme-preview',
     description='Preview a GRUB 2.x theme using KVM/QEMU',
