@@ -97,18 +97,18 @@ def _run(cmd, verbose):
 
 def _generate_dummy_menu_entries():
     return dedent("""\
-            menuentry 'Debian' --class debian --class gnu-linux --class linux --class gnu --class os {
-                reboot
-            }
+        menuentry 'Debian' --class debian --class gnu-linux --class linux --class gnu --class os {
+            reboot
+        }
 
-            menuentry 'Gentoo' --class gentoo --class gnu-linux --class linux --class gnu --class os {
-                reboot
-            }
+        menuentry 'Gentoo' --class gentoo --class gnu-linux --class linux --class gnu --class os {
+            reboot
+        }
 
-            menuentry "Memtest86+" {
-                reboot
-            }
-            """)
+        menuentry "Memtest86+" {
+            reboot
+        }
+    """)
 
 
 def _make_grub_cfg_load_our_theme(grub_cfg_content, source_type, resolution_or_none,
@@ -202,9 +202,8 @@ def _make_final_grub_cfg_content(source_type, source_grub_cfg, resolution_or_non
         else:
             break
     else:
-        print(
-            'INFO: Could not read external GRUB config file, falling back to internal example config'
-        )
+        print('INFO: Could not read external GRUB config file'
+              ', falling back to internal example config')
         content = _generate_dummy_menu_entries()
 
     return _make_grub_cfg_load_our_theme(content, source_type, resolution_or_none,
@@ -241,7 +240,7 @@ def iterate_pf2_files_relative(abs_theme_dir):
 
 
 def validate_grub2_mkrescue_addition(candidate: str) -> str:
-    if not '=/' in candidate:
+    if '=/' not in candidate:
         raise ValueError
     return candidate
 
@@ -300,9 +299,8 @@ def parse_command_line():
         dest='enable_kvm',
         default=True,
         action='store_false',
-        help=
-        'do not pass -enable-kvm to QEMU (and hence fall back to acceleration "tcg" which is significantly slower than KVM)'
-    )
+        help='do not pass -enable-kvm to QEMU'
+        ' (and hence fall back to acceleration "tcg" which is significantly slower than KVM)')
 
     debugging = parser.add_argument_group('debugging arguments')
     debugging.add_argument('--debug',
@@ -440,8 +438,8 @@ def _inner_main(options):
 
         is_efi_host = 'efi' in grub2_platform
         if is_efi_host:
-            omvf_image_path, omvf_image_path_hint, omvf_candidate_package_names = _grub2_ovmf_tuple(
-            )
+            omvf_image_path, omvf_image_path_hint, omvf_candidate_package_names \
+                = _grub2_ovmf_tuple()
             if omvf_image_path is None:
                 package_names_hint = ' or '.join(
                     repr(package_name) for package_name in omvf_candidate_package_names)
