@@ -48,16 +48,16 @@ usage: grub2-theme-preview [-h] [--grub-cfg PATH] [--verbose]
                            PATH
 
 positional arguments:
-  PATH                  Path of theme directory (or PNG/TGA image file) to
+  PATH                  path of theme directory (or PNG/TGA image file) to
                         preview
 
 optional arguments:
   -h, --help            show this help message and exit
-  --grub-cfg PATH       Path of custom grub.cfg file to use (default:
+  --grub-cfg PATH       path of custom grub.cfg file to use (default:
                         /boot/grub{2,}/grub.cfg)
-  --verbose             Increase verbosity
-  --resolution WxH      Set a custom resolution, e.g. 800x600
-  --timeout SECONDS     Set timeout in whole seconds or -1 to disable
+  --verbose             increase verbosity
+  --resolution WxH      set a custom resolution, e.g. 800x600
+  --timeout SECONDS     set GRUB timeout in whole seconds or -1 to disable
                         (default: 30 seconds)
   --add TARGET=/SOURCE  make grub2-mkrescue add file(s) from /SOURCE to
                         /TARGET in the rescue image (can be passed multiple
@@ -71,13 +71,13 @@ command location arguments:
   --xorriso COMMAND     xorriso command (default: xorriso)
 
 arguments related to invokation of QEMU/KVM:
-  --no-kvm              Do not pass -enable-kvm to QEMU (and hence fall back
+  --no-kvm              do not pass -enable-kvm to QEMU (and hence fall back
                         to acceleration "tcg" which is significantly slower
                         than KVM)
 
 debugging arguments:
-  --debug               Enable debugging output
-  --plain-rescue-image  Use unprocessed GRUB rescue image with no theme
+  --debug               enable debugging output
+  --plain-rescue-image  use unprocessed GRUB rescue image with no theme
                         patched in; useful for checking if a plain GRUB rescue
                         image shows up a GRUB shell, successfully.
 ```
