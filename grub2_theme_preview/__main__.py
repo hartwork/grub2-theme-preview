@@ -1,6 +1,7 @@
 # Copyright (C) 2015 Sebastian Pipping <sebastian@pipping.org>
 # Licensed under GPL v2 or later
 
+import contextlib
 import errno
 import glob
 import os
@@ -337,13 +338,6 @@ def parse_command_line():
     return options
 
 
-def _ignore_oserror(func, *args, **kwargs):
-    try:
-        func(*args, **kwargs)
-    except OSError:
-        pass
-
-
 def _grub2_directory(platform):
     return '/usr/lib/grub/%s' % platform
 
@@ -519,11 +513,14 @@ def _inner_main(options):
 
                 _run(run_command, options.verbose)
             finally:
-                _ignore_oserror(os.remove, abs_tmp_img_file)
+                with contextlib.suppress(OSError):
+                    os.remove(abs_tmp_img_file)
         finally:
-            _ignore_oserror(os.remove, abs_tmp_grub_cfg_file)
+            with contextlib.suppress(OSError):
+                os.remove(abs_tmp_grub_cfg_file)
     finally:
-        _ignore_oserror(os.rmdir, abs_tmp_folder)
+        with contextlib.suppress(OSError):
+            os.rmdir(abs_tmp_folder)
 
 
 def main():
