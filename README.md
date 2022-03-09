@@ -71,6 +71,8 @@ command location arguments:
   --xorriso COMMAND     xorriso command (default: xorriso)
 
 arguments related to invokation of QEMU/KVM:
+  --display DISPLAY     pass "-display DISPLAY" to QEMU, see "man qemu" for
+                        details (default: use QEMU's default display)
   --no-kvm              do not pass -enable-kvm to QEMU (and hence fall back
                         to acceleration "tcg" which is significantly slower
                         than KVM)
