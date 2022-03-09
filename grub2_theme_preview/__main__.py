@@ -4,20 +4,19 @@
 import errno
 import glob
 import os
+import platform
 import re
-from argparse import ArgumentParser
-from enum import Enum
-from textwrap import dedent
 import signal
 import subprocess
 import sys
 import tempfile
 import traceback
-import platform
+from argparse import ArgumentParser
+from enum import Enum
+from textwrap import dedent
 
 from .version import VERSION_STR
 from .which import which
-
 
 _PATH_IMAGE_ONLY_PNG = 'themes/DEMO.png'
 _PATH_IMAGE_ONLY_TGA = 'themes/DEMO.tga'
