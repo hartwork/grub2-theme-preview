@@ -27,6 +27,7 @@ _KILL_BY_SIGNAL = 128
 
 
 class _CommandNotFoundException(Exception):
+
     def __init__(self, command, package=None):
         self._command = command
         self._package = package
@@ -110,24 +111,25 @@ def _generate_dummy_menu_entries():
             """)
 
 
-def _make_grub_cfg_load_our_theme(grub_cfg_content, source_type, resolution_or_none, font_files_to_load, timeout_seconds):
+def _make_grub_cfg_load_our_theme(grub_cfg_content, source_type, resolution_or_none,
+                                  font_files_to_load, timeout_seconds):
     # NOTE: The last font loaded becomes the default/fallback font
     #       So if we load fonts first, the remaining default font
     #       will remain unchanged and the theme will display unchanged.
     prolog_chunks = [
-            'loadfont $prefix/fonts/unicode.pf2',
-            ]
+        'loadfont $prefix/fonts/unicode.pf2',
+    ]
 
     for relative_path in font_files_to_load:
         prolog_chunks.append(f'loadfont $prefix/{_PATH_FULL_THEME}/{relative_path}')
 
     prolog_chunks += [
-            'insmod all_video',
-            'insmod gfxterm',
-            'insmod png',
-            'insmod tga',
-            'insmod jpeg',
-            ]
+        'insmod all_video',
+        'insmod gfxterm',
+        'insmod png',
+        'insmod tga',
+        'insmod jpeg',
+    ]
 
     if resolution_or_none is not None:
         # We need to be the first call to 'terminal_output gfxterm'
@@ -139,17 +141,16 @@ def _make_grub_cfg_load_our_theme(grub_cfg_content, source_type, resolution_or_n
     prolog_chunks.append('')  # trailing new line
 
     epilog_chunks = [
-            # Ensure that we always have one or more menu entries
-            '',
-            'submenu \'Reboot / Shutdown\' {',
-            '    menuentry Reboot { reboot }',
-            '    menuentry Shutdown { halt }',
-            '}',
-
-            '',
-            'set default=0',  # i.e. move cursor to first entry
-            'set timeout=%d' % timeout_seconds,
-            ]
+        # Ensure that we always have one or more menu entries
+        '',
+        'submenu \'Reboot / Shutdown\' {',
+        '    menuentry Reboot { reboot }',
+        '    menuentry Shutdown { halt }',
+        '}',
+        '',
+        'set default=0',  # i.e. move cursor to first entry
+        'set timeout=%d' % timeout_seconds,
+    ]
 
     if resolution_or_none is None:
         # If we haven't ensured GFX mode earlier, do it now
@@ -171,21 +172,24 @@ def _make_grub_cfg_load_our_theme(grub_cfg_content, source_type, resolution_or_n
     return '\n'.join(prolog_chunks) + grub_cfg_content + '\n'.join(epilog_chunks)
 
 
-def _make_final_grub_cfg_content(source_type, source_grub_cfg, resolution_or_none, font_files_to_load, timeout_seconds):
+def _make_final_grub_cfg_content(source_type, source_grub_cfg, resolution_or_none,
+                                 font_files_to_load, timeout_seconds):
     if source_grub_cfg is not None:
         files_to_try_to_read = [source_grub_cfg]
         fail_if_missing = True
     else:
         files_to_try_to_read = [
-                '/boot/grub2/grub.cfg',
-                '/boot/grub/grub.cfg',
-                ]
+            '/boot/grub2/grub.cfg',
+            '/boot/grub/grub.cfg',
+        ]
         fail_if_missing = False
 
     for candidate in files_to_try_to_read:
         if not os.path.exists(candidate):
             if fail_if_missing:
-                print('ERROR: [Errno %d] %s: \'%s\'' % (errno.ENOENT, os.strerror(errno.ENOENT), candidate), file=sys.stderr)
+                print('ERROR: [Errno %d] %s: \'%s\'' %
+                      (errno.ENOENT, os.strerror(errno.ENOENT), candidate),
+                      file=sys.stderr)
                 sys.exit(1)
             continue
 
@@ -198,10 +202,13 @@ def _make_final_grub_cfg_content(source_type, source_grub_cfg, resolution_or_non
         else:
             break
     else:
-        print('INFO: Could not read external GRUB config file, falling back to internal example config')
+        print(
+            'INFO: Could not read external GRUB config file, falling back to internal example config'
+        )
         content = _generate_dummy_menu_entries()
 
-    return _make_grub_cfg_load_our_theme(content, source_type, resolution_or_none, font_files_to_load, timeout_seconds)
+    return _make_grub_cfg_load_our_theme(content, source_type, resolution_or_none,
+                                         font_files_to_load, timeout_seconds)
 
 
 def resolution(text):
@@ -226,7 +233,7 @@ def iterate_pf2_files_relative(abs_theme_dir):
     for pattern in (
             os.path.join(abs_theme_dir, '*.pf2'),
             os.path.join(abs_theme_dir, 'f', '*.pf2'),
-            ):
+    ):
         for path in sorted(glob.iglob(pattern), key=lambda path: path.lower()):
             relative_path = os.path.relpath(path, abs_theme_dir)
             print('INFO: Appending to fonts to load: %s' % relative_path)
@@ -238,37 +245,76 @@ def validate_grub2_mkrescue_addition(candidate: str) -> str:
         raise ValueError
     return candidate
 
+
 # This string is picked up by argparse error message generator:
 validate_grub2_mkrescue_addition.__name__ = 'grub2-mkrescue addition'
 
 
 def parse_command_line():
     parser = ArgumentParser(prog='grub2-theme-preview')
-    parser.add_argument('--grub-cfg', metavar='PATH', help='path of custom grub.cfg file to use (default: /boot/grub{2,}/grub.cfg)')
+    parser.add_argument(
+        '--grub-cfg',
+        metavar='PATH',
+        help='path of custom grub.cfg file to use (default: /boot/grub{2,}/grub.cfg)')
     parser.add_argument('--verbose', default=False, action='store_true', help='increase verbosity')
-    parser.add_argument('--resolution', metavar='WxH', type=resolution, help='set a custom resolution, e.g. 800x600')
-    parser.add_argument('--timeout', metavar='SECONDS', dest='timeout_seconds', type=timeout, default=30,
-            help='set GRUB timeout in whole seconds or -1 to disable (default: %(default)s seconds)')
-    parser.add_argument('--add', default=[], action='append', dest='addition_requests', metavar='TARGET=/SOURCE', type=validate_grub2_mkrescue_addition,
-                        help=('make grub2-mkrescue add file(s) from /SOURCE to /TARGET in the rescue image'
-                              ' (can be passed multiple times)'))
-    parser.add_argument('source', metavar='PATH', help='path of theme directory (or PNG/TGA image file) to preview')
+    parser.add_argument('--resolution',
+                        metavar='WxH',
+                        type=resolution,
+                        help='set a custom resolution, e.g. 800x600')
+    parser.add_argument(
+        '--timeout',
+        metavar='SECONDS',
+        dest='timeout_seconds',
+        type=timeout,
+        default=30,
+        help='set GRUB timeout in whole seconds or -1 to disable (default: %(default)s seconds)')
+    parser.add_argument(
+        '--add',
+        default=[],
+        action='append',
+        dest='addition_requests',
+        metavar='TARGET=/SOURCE',
+        type=validate_grub2_mkrescue_addition,
+        help=('make grub2-mkrescue add file(s) from /SOURCE to /TARGET in the rescue image'
+              ' (can be passed multiple times)'))
+    parser.add_argument('source',
+                        metavar='PATH',
+                        help='path of theme directory (or PNG/TGA image file) to preview')
     parser.add_argument('--version', action='version', version='%(prog)s ' + VERSION_STR)
 
     commands = parser.add_argument_group('command location arguments')
-    commands.add_argument('--grub2-mkrescue', metavar='COMMAND', help='grub2-mkrescue command (default: auto-detect)')
-    commands.add_argument('--qemu', metavar='COMMAND', help='KVM/QEMU command (default: qemu-system-<machine>)')
-    commands.add_argument('--xorriso', default='xorriso', metavar='COMMAND', help='xorriso command (default: %(default)s)')
+    commands.add_argument('--grub2-mkrescue',
+                          metavar='COMMAND',
+                          help='grub2-mkrescue command (default: auto-detect)')
+    commands.add_argument('--qemu',
+                          metavar='COMMAND',
+                          help='KVM/QEMU command (default: qemu-system-<machine>)')
+    commands.add_argument('--xorriso',
+                          default='xorriso',
+                          metavar='COMMAND',
+                          help='xorriso command (default: %(default)s)')
 
     qemu = parser.add_argument_group('arguments related to invokation of QEMU/KVM')
-    qemu.add_argument('--no-kvm', dest='enable_kvm', default=True, action='store_false',
-                      help='do not pass -enable-kvm to QEMU (and hence fall back to acceleration "tcg" which is significantly slower than KVM)')
+    qemu.add_argument(
+        '--no-kvm',
+        dest='enable_kvm',
+        default=True,
+        action='store_false',
+        help=
+        'do not pass -enable-kvm to QEMU (and hence fall back to acceleration "tcg" which is significantly slower than KVM)'
+    )
 
     debugging = parser.add_argument_group('debugging arguments')
-    debugging.add_argument('--debug', default=False, action='store_true', help='enable debugging output')
-    debugging.add_argument('--plain-rescue-image', default=False, action='store_true',
-                           help='use unprocessed GRUB rescue image with no theme patched in; '
-                           'useful for checking if a plain GRUB rescue image shows up a GRUB shell, successfully.')
+    debugging.add_argument('--debug',
+                           default=False,
+                           action='store_true',
+                           help='enable debugging output')
+    debugging.add_argument(
+        '--plain-rescue-image',
+        default=False,
+        action='store_true',
+        help='use unprocessed GRUB rescue image with no theme patched in; '
+        'useful for checking if a plain GRUB rescue image shows up a GRUB shell, successfully.')
 
     options = parser.parse_args()
 
@@ -295,7 +341,7 @@ def _ignore_oserror(func, *args, **kwargs):
 
 
 def _grub2_directory(platform):
-    return  '/usr/lib/grub/%s' % platform
+    return '/usr/lib/grub/%s' % platform
 
 
 def _grub2_platform():
@@ -349,12 +395,12 @@ def _require_recursive_read_access_at(abs_path):
 
 def _inner_main(options):
     for command, package in (
-            (options.grub2_mkrescue, 'Grub 2.x'),
-            ('mcopy', 'mtools'),    # see issue #8
-            ('mformat', 'mtools'),  # see issue #8
-            (options.qemu, 'KVM/QEMU'),
-            (options.xorriso, 'libisoburn'),
-            ):
+        (options.grub2_mkrescue, 'Grub 2.x'),
+        ('mcopy', 'mtools'),  # see issue #8
+        ('mformat', 'mtools'),  # see issue #8
+        (options.qemu, 'KVM/QEMU'),
+        (options.xorriso, 'libisoburn'),
+    ):
         try:
             which(command)
         except OSError:
@@ -371,12 +417,12 @@ def _inner_main(options):
 
     abs_grub_cfg_or_none = options.grub_cfg and os.path.abspath(options.grub_cfg)
     grub_cfg_content = _make_final_grub_cfg_content(
-            source_type,
-            abs_grub_cfg_or_none,
-            options.resolution,
-            font_files_to_load,
-            options.timeout_seconds,
-            )
+        source_type,
+        abs_grub_cfg_or_none,
+        options.resolution,
+        font_files_to_load,
+        options.timeout_seconds,
+    )
     if options.debug:
         _dump_grub_cfg_content(grub_cfg_content, target=sys.stderr)
 
@@ -389,18 +435,19 @@ def _inner_main(options):
         grub2_platform = _grub2_platform()
         grub2_platform_directory = _grub2_directory(grub2_platform)
         if not os.path.exists(grub2_platform_directory):
-            raise OSError(errno.ENOENT, 'GRUB platform directory "%s" not found' % grub2_platform_directory)
+            raise OSError(errno.ENOENT,
+                          'GRUB platform directory "%s" not found' % grub2_platform_directory)
 
         is_efi_host = 'efi' in grub2_platform
         if is_efi_host:
-            omvf_image_path, omvf_image_path_hint, omvf_candidate_package_names = _grub2_ovmf_tuple()
+            omvf_image_path, omvf_image_path_hint, omvf_candidate_package_names = _grub2_ovmf_tuple(
+            )
             if omvf_image_path is None:
-                package_names_hint = ' or '.join(repr(package_name)
-                                                 for package_name
-                                                 in omvf_candidate_package_names)
-                raise OSError(errno.ENOENT,
-                              'OVMF image file "%s" is missing, please install package %s.'
-                              % (omvf_image_path_hint, package_names_hint))
+                package_names_hint = ' or '.join(
+                    repr(package_name) for package_name in omvf_candidate_package_names)
+                raise OSError(
+                    errno.ENOENT, 'OVMF image file "%s" is missing, please install package %s.' %
+                    (omvf_image_path_hint, package_names_hint))
             print(f'INFO: Found OVMF image at {omvf_image_path!r}.')
 
         try:
@@ -408,9 +455,11 @@ def _inner_main(options):
             assemble_cmd = [
                 options.grub2_mkrescue,
                 '--directory=%s' % grub2_platform_directory,
-                '--xorriso', options.xorriso,
-                '--output', abs_tmp_img_file,
-                ]
+                '--xorriso',
+                options.xorriso,
+                '--output',
+                abs_tmp_img_file,
+            ]
 
             if not options.plain_rescue_image:
                 # Add boot loader entry files read by GRUB's blscfg command, e.g. on recent Fedora
@@ -430,11 +479,11 @@ def _inner_main(options):
             if source_type != _SourceType.DIRECTORY:
                 assemble_cmd += [
                     f'boot/grub/{_get_image_path_for(source_type)}={normalized_source}',
-                    ]
+                ]
             else:
                 assemble_cmd += [
                     f'boot/grub/{_PATH_FULL_THEME}/={normalized_source}',
-                    ]
+                ]
 
             assemble_cmd += options.addition_requests
 
@@ -447,14 +496,17 @@ def _inner_main(options):
 
                 run_command = [
                     options.qemu,
-                    '-m', '256',
-                    '-drive', 'file=%s,index=0,media=disk,format=raw' % abs_tmp_img_file,
+                    '-m',
+                    '256',
+                    '-drive',
+                    'file=%s,index=0,media=disk,format=raw' % abs_tmp_img_file,
                 ]
                 if options.enable_kvm:
                     run_command.append('-enable-kvm')
                 if is_efi_host:
                     run_command += [
-                        '-bios', omvf_image_path,
+                        '-bios',
+                        omvf_image_path,
                     ]
 
                 print('INFO: Please give GRUB a moment to show up in QEMU...')
