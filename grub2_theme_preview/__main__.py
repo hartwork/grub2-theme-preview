@@ -245,15 +245,15 @@ validate_grub2_mkrescue_addition.__name__ = 'grub2-mkrescue addition'
 
 def parse_command_line():
     parser = ArgumentParser(prog='grub2-theme-preview')
-    parser.add_argument('--grub-cfg', metavar='PATH', help='Path of custom grub.cfg file to use (default: /boot/grub{2,}/grub.cfg)')
-    parser.add_argument('--verbose', default=False, action='store_true', help='Increase verbosity')
-    parser.add_argument('--resolution', metavar='WxH', type=resolution, help='Set a custom resolution, e.g. 800x600')
+    parser.add_argument('--grub-cfg', metavar='PATH', help='path of custom grub.cfg file to use (default: /boot/grub{2,}/grub.cfg)')
+    parser.add_argument('--verbose', default=False, action='store_true', help='increase verbosity')
+    parser.add_argument('--resolution', metavar='WxH', type=resolution, help='set a custom resolution, e.g. 800x600')
     parser.add_argument('--timeout', metavar='SECONDS', dest='timeout_seconds', type=timeout, default=30,
-            help='Set timeout in whole seconds or -1 to disable (default: %(default)s seconds)')
+            help='set GRUB timeout in whole seconds or -1 to disable (default: %(default)s seconds)')
     parser.add_argument('--add', default=[], action='append', dest='addition_requests', metavar='TARGET=/SOURCE', type=validate_grub2_mkrescue_addition,
                         help=('make grub2-mkrescue add file(s) from /SOURCE to /TARGET in the rescue image'
                               ' (can be passed multiple times)'))
-    parser.add_argument('source', metavar='PATH', help='Path of theme directory (or PNG/TGA image file) to preview')
+    parser.add_argument('source', metavar='PATH', help='path of theme directory (or PNG/TGA image file) to preview')
     parser.add_argument('--version', action='version', version='%(prog)s ' + VERSION_STR)
 
     commands = parser.add_argument_group('command location arguments')
@@ -263,12 +263,12 @@ def parse_command_line():
 
     qemu = parser.add_argument_group('arguments related to invokation of QEMU/KVM')
     qemu.add_argument('--no-kvm', dest='enable_kvm', default=True, action='store_false',
-                      help='Do not pass -enable-kvm to QEMU (and hence fall back to acceleration "tcg" which is significantly slower than KVM)')
+                      help='do not pass -enable-kvm to QEMU (and hence fall back to acceleration "tcg" which is significantly slower than KVM)')
 
     debugging = parser.add_argument_group('debugging arguments')
-    debugging.add_argument('--debug', default=False, action='store_true', help='Enable debugging output')
+    debugging.add_argument('--debug', default=False, action='store_true', help='enable debugging output')
     debugging.add_argument('--plain-rescue-image', default=False, action='store_true',
-                           help='Use unprocessed GRUB rescue image with no theme patched in; '
+                           help='use unprocessed GRUB rescue image with no theme patched in; '
                            'useful for checking if a plain GRUB rescue image shows up a GRUB shell, successfully.')
 
     options = parser.parse_args()
