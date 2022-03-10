@@ -250,7 +250,7 @@ def validate_grub2_mkrescue_addition(candidate: str) -> str:
 validate_grub2_mkrescue_addition.__name__ = 'grub2-mkrescue addition'
 
 
-def parse_command_line():
+def parse_command_line(argv):
     parser = ArgumentParser(prog='grub2-theme-preview')
     parser.add_argument(
         '--grub-cfg',
@@ -321,7 +321,7 @@ def parse_command_line():
                            'useful for checking if a plain GRUB rescue image'
                            ' shows up a GRUB shell, successfully.')
 
-    options = parser.parse_args()
+    options = parser.parse_args(argv[1:])
 
     if options.qemu is None:
         import platform
@@ -526,9 +526,12 @@ def _inner_main(options):
             os.rmdir(abs_tmp_folder)
 
 
-def main():
+def main(argv=None):
+    if argv is None:
+        argv = sys.argv
+
     try:
-        options = parse_command_line()
+        options = parse_command_line(argv)
     except KeyboardInterrupt:
         sys.exit(_KILL_BY_SIGNAL + signal.SIGINT)
 
