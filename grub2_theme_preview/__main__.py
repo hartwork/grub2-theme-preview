@@ -474,16 +474,16 @@ def _inner_main(options):
 
                 assemble_cmd.append('boot/grub/grub.cfg=%s' % abs_tmp_grub_cfg_file)
 
-            if source_type != _SourceType.DIRECTORY:
-                assemble_cmd += [
-                    f'boot/grub/{_get_image_path_for(source_type)}={normalized_source}',
-                ]
-            else:
-                assemble_cmd += [
-                    f'boot/grub/{_PATH_FULL_THEME}/={normalized_source}',
-                ]
+                if source_type != _SourceType.DIRECTORY:
+                    assemble_cmd += [
+                        f'boot/grub/{_get_image_path_for(source_type)}={normalized_source}',
+                    ]
+                else:
+                    assemble_cmd += [
+                        f'boot/grub/{_PATH_FULL_THEME}/={normalized_source}',
+                    ]
 
-            assemble_cmd += options.addition_requests
+                assemble_cmd += options.addition_requests
 
             try:
                 _run(assemble_cmd, options.verbose)
