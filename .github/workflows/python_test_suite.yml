@@ -1,0 +1,44 @@
+# Copyright (c) 2022 Sebastian Pipping <sebastian@pipping.org>
+# Licensed under GPL v2 or later
+
+name: Run Python test suite
+
+on:
+- pull_request
+- push
+
+jobs:
+  python_test_suite:
+    name: Run Python test suite
+    strategy:
+      matrix:
+        python-version: [3.7, '3.10']  # no particular need for in-between versions
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3.0.0
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v3.0.0
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install build dependencies
+        run: |-
+          set -x
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends --yes -V \
+              grub-common \
+              mtools \
+              xorriso
+          python3 -m venv venv/
+          source venv/bin/activate
+          pip3 install -r requirements.txt
+          pip3 check
+          diff -u0 <(pip3 freeze | sed 's,_,-,g' | sort -f) <(sed -e '/^#/d' -e '/^$/d' requirements.txt | sort -f)
+
+      - name: Run Python test suite
+        run: |-
+          set -x
+          source venv/bin/activate
+          coverage run -m pytest -v -s
+          coverage report

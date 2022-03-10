@@ -250,7 +250,7 @@ def validate_grub2_mkrescue_addition(candidate: str) -> str:
 validate_grub2_mkrescue_addition.__name__ = 'grub2-mkrescue addition'
 
 
-def parse_command_line():
+def parse_command_line(argv):
     parser = ArgumentParser(prog='grub2-theme-preview')
     parser.add_argument(
         '--grub-cfg',
@@ -321,7 +321,7 @@ def parse_command_line():
                            'useful for checking if a plain GRUB rescue image'
                            ' shows up a GRUB shell, successfully.')
 
-    options = parser.parse_args()
+    options = parser.parse_args(argv[1:])
 
     if options.qemu is None:
         import platform
@@ -474,16 +474,16 @@ def _inner_main(options):
 
                 assemble_cmd.append('boot/grub/grub.cfg=%s' % abs_tmp_grub_cfg_file)
 
-            if source_type != _SourceType.DIRECTORY:
-                assemble_cmd += [
-                    f'boot/grub/{_get_image_path_for(source_type)}={normalized_source}',
-                ]
-            else:
-                assemble_cmd += [
-                    f'boot/grub/{_PATH_FULL_THEME}/={normalized_source}',
-                ]
+                if source_type != _SourceType.DIRECTORY:
+                    assemble_cmd += [
+                        f'boot/grub/{_get_image_path_for(source_type)}={normalized_source}',
+                    ]
+                else:
+                    assemble_cmd += [
+                        f'boot/grub/{_PATH_FULL_THEME}/={normalized_source}',
+                    ]
 
-            assemble_cmd += options.addition_requests
+                assemble_cmd += options.addition_requests
 
             try:
                 _run(assemble_cmd, options.verbose)
@@ -526,9 +526,12 @@ def _inner_main(options):
             os.rmdir(abs_tmp_folder)
 
 
-def main():
+def main(argv=None):
+    if argv is None:
+        argv = sys.argv
+
     try:
-        options = parse_command_line()
+        options = parse_command_line(argv)
     except KeyboardInterrupt:
         sys.exit(_KILL_BY_SIGNAL + signal.SIGINT)
 
