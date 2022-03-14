@@ -1,5 +1,5 @@
 # Direct dependencies
-pytest==7.0.1
+pytest==7.1.0
 parameterized==0.8.1
 coverage==6.3.2
 
