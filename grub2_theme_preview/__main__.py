@@ -106,7 +106,7 @@ def _generate_dummy_menu_entries():
             reboot
         }
 
-        menuentry "Memtest86+" {
+        menuentry "Memtest86+" --class memtest {
             reboot
         }
     """)
@@ -144,9 +144,9 @@ def _make_grub_cfg_load_our_theme(grub_cfg_content, source_type, resolution_or_n
     epilog_chunks = [
         # Ensure that we always have one or more menu entries
         '',
-        'submenu \'Reboot / Shutdown\' {',
-        '    menuentry Reboot { reboot }',
-        '    menuentry Shutdown { halt }',
+        'submenu \'Reboot / Shutdown\' --class shutdown {',
+        '    menuentry Reboot --class restart { reboot }',
+        '    menuentry Shutdown --class shutdown { halt }',
         '}',
         '',
         'set default=0',  # i.e. move cursor to first entry
