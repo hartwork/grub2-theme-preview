@@ -9,9 +9,6 @@
     mach-nix.url = "github:DavHau/mach-nix";
     mach-nix.inputs.nixpkgs.follows = "nixpkgs";
     mach-nix.inputs.flake-utils.follows = "flake-utils";
-    # TODO: still has outdated dependencies...
-    mach-nix.inputs.pypi-deps-db.url = "github:DavHau/pypi-deps-db/master";
-    mach-nix.inputs.pypi-deps-db.flake = true;
   };
 
   outputs = { self, nixpkgs, flake-utils, mach-nix, ... }:
@@ -22,7 +19,10 @@
           inherit system;
         };
         mach-nix-wrapper = import mach-nix { inherit pkgs python; };
-        requirements = builtins.readFile ./requirements.txt;
+        requirements = ''
+          # pinned to mach pypi-dep-db revision.
+          setuptools
+        '';
         pythonBuild = mach-nix-wrapper.mkPython {
           inherit requirements;
         };
@@ -50,8 +50,8 @@
               #!${pkgs.bash}/bin/bash
               PATH=\$PATH:${pkgs.grub2_efi}/bin:${pkgs.qemu}/bin:${pkgs.xorriso}/bin:${pkgs.mtools}/bin\
                 PYTHONPATH=\$PYTHONPATH:$out/lib/python3.9/site-packages\
-                GRUB2_PREVIEW_ROOT=${pkgs.grub2_efi}/lib/grub\
-                GRUB2_PREVIEW_OVMF_CANDIDATE=${pkgs.OVMF.fd}/FV/OVMF.fd\
+                G2TP_GRUB_LIB=${pkgs.grub2_efi}/lib/grub\
+                G2TP_OVMF_IMAGE=${pkgs.OVMF.fd}/FV/OVMF.fd\
                 $out/bin/.grub2-theme-preview-wrapped \$@;
               EOF
               chmod +x $out/bin/grub2-theme-preview;

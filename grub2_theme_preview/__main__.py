@@ -144,9 +144,9 @@ def _make_grub_cfg_load_our_theme(grub_cfg_content, source_type, resolution_or_n
     epilog_chunks = [
         # Ensure that we always have one or more menu entries
         '',
-        'submenu \'Reboot / Shutdown\' --class shutdown {',
-        '    menuentry Reboot --class restart { reboot }',
-        '    menuentry Shutdown --class shutdown { halt }',
+        'submenu \'Reboot / Shutdown\' {',
+        '    menuentry Reboot { reboot }',
+        '    menuentry Shutdown { halt }',
         '}',
         '',
         'set default=0',  # i.e. move cursor to first entry
@@ -339,7 +339,7 @@ def parse_command_line(argv):
 
 
 def _grub2_directory(platform):
-    return  '%s/%s' % (os.environ.get('GRUB2_PREVIEW_ROOT', '/usr/lib/grub'), platform)
+    return  '%s/%s' % (os.environ.get('G2TP_GRUB_LIB', '/usr/lib/grub'), platform)
 
 
 def _grub2_platform():
@@ -361,13 +361,16 @@ def _grub2_ovmf_tuple():
     2. a display hint for humans where the file is located, roughly
     3. a list of package names to try install, potentially
     """
-    candidates = [
-        '/usr/share/edk2-ovmf/OVMF_CODE.fd',  # Gentoo and its derivatives
-        '/usr/share/edk2-ovmf/x64/OVMF_CODE.fd',  # Arch Linux and its derivatives
-        '/usr/share/OVMF/OVMF_CODE.fd',  # Debian and its derivatives
-        '/usr/share/edk2/ovmf/OVMF_CODE.fd',  # Fedora (and its derivatives?)
-        os.environ.get('GRUB2_PREVIEW_OVMF_CANDIDATE', ''), # NixOS and potentially others
-    ]
+    omvf_image = os.environ.get('G2TP_OVMF_IMAGE')
+    if omvf_image is not None: # Support non-standard locations e.g. NixOS
+        candidates = [omvf_image]
+    else:
+        candidates = [
+            '/usr/share/edk2-ovmf/OVMF_CODE.fd',  # Gentoo and its derivatives
+            '/usr/share/edk2-ovmf/x64/OVMF_CODE.fd',  # Arch Linux and its derivatives
+            '/usr/share/OVMF/OVMF_CODE.fd',  # Debian and its derivatives
+            '/usr/share/edk2/ovmf/OVMF_CODE.fd',  # Fedora (and its derivatives?)
+        ]
 
     for candidate in candidates:
         if os.path.exists(candidate):
