@@ -106,7 +106,7 @@ def _generate_dummy_menu_entries():
             reboot
         }
 
-        menuentry "Memtest86+" {
+        menuentry "Memtest86+" --class memtest {
             reboot
         }
     """)
