@@ -144,9 +144,9 @@ def _make_grub_cfg_load_our_theme(grub_cfg_content, source_type, resolution_or_n
     epilog_chunks = [
         # Ensure that we always have one or more menu entries
         '',
-        'submenu \'Reboot / Shutdown\' {',
-        '    menuentry Reboot { reboot }',
-        '    menuentry Shutdown { halt }',
+        'submenu \'Reboot / Shutdown\' --class shutdown {',
+        '    menuentry Reboot --class restart { reboot }',
+        '    menuentry Shutdown --class shutdown { halt }',
         '}',
         '',
         'set default=0',  # i.e. move cursor to first entry
@@ -339,7 +339,7 @@ def parse_command_line(argv):
 
 
 def _grub2_directory(platform):
-    return '/nix/store/b7d41b33jcqvi65yg34v1hqba6za0mxj-grub-2.06/lib/grub/%s' % platform
+    return  '%s/%s' % (os.environ.get('GRUB2_PREVIEW_ROOT', '/usr/lib/grub'), platform)
 
 
 def _grub2_platform():
@@ -366,8 +366,9 @@ def _grub2_ovmf_tuple():
         '/usr/share/edk2-ovmf/x64/OVMF_CODE.fd',  # Arch Linux and its derivatives
         '/usr/share/OVMF/OVMF_CODE.fd',  # Debian and its derivatives
         '/usr/share/edk2/ovmf/OVMF_CODE.fd',  # Fedora (and its derivatives?)
-        "/nix/store/mckigvm3b04lcrdw7j56jz0z87f5zg2c-OVMF-202108-fd/FV/OVMF.fd",  # NixOS
+        os.environ.get('GRUB2_PREVIEW_OVMF_CANDIDATE', ''), # NixOS and potentially others
     ]
+
     for candidate in candidates:
         if os.path.exists(candidate):
             return candidate, None, []
