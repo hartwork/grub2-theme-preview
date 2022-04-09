@@ -339,7 +339,7 @@ def parse_command_line(argv):
 
 
 def _grub2_directory(platform):
-    return  '%s/%s' % (os.environ.get('G2TP_GRUB_LIB', '/usr/lib/grub'), platform)
+    return '%s/%s' % (os.environ.get('G2TP_GRUB_LIB', '/usr/lib/grub'), platform)
 
 
 def _grub2_platform():
@@ -362,7 +362,7 @@ def _grub2_ovmf_tuple():
     3. a list of package names to try install, potentially
     """
     omvf_image = os.environ.get('G2TP_OVMF_IMAGE')
-    if omvf_image is not None: # Support non-standard locations e.g. NixOS
+    if omvf_image is not None:  # Support non-standard locations e.g. NixOS
         candidates = [omvf_image]
     else:
         candidates = [
