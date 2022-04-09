@@ -339,7 +339,7 @@ def parse_command_line(argv):
 
 
 def _grub2_directory(platform):
-    return '%s/%s' % (os.environ.get('G2TP_GRUB_LIB', '/usr/lib/grub'), platform)
+    return '{}/{}'.format(os.environ.get('G2TP_GRUB_LIB', '/usr/lib/grub'), platform)
 
 
 def _grub2_platform():
