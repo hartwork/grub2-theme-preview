@@ -339,7 +339,7 @@ def parse_command_line(argv):
 
 
 def _grub2_directory(platform):
-    return '/usr/lib/grub/%s' % platform
+    return '{}/{}'.format(os.environ.get('G2TP_GRUB_LIB', '/usr/lib/grub'), platform)
 
 
 def _grub2_platform():
@@ -361,12 +361,17 @@ def _grub2_ovmf_tuple():
     2. a display hint for humans where the file is located, roughly
     3. a list of package names to try install, potentially
     """
-    candidates = [
-        '/usr/share/edk2-ovmf/OVMF_CODE.fd',  # Gentoo and its derivatives
-        '/usr/share/edk2-ovmf/x64/OVMF_CODE.fd',  # Arch Linux and its derivatives
-        '/usr/share/OVMF/OVMF_CODE.fd',  # Debian and its derivatives
-        '/usr/share/edk2/ovmf/OVMF_CODE.fd',  # Fedora (and its derivatives?)
-    ]
+    omvf_image = os.environ.get('G2TP_OVMF_IMAGE')
+    if omvf_image is not None:  # Support non-standard locations e.g. NixOS
+        candidates = [omvf_image]
+    else:
+        candidates = [
+            '/usr/share/edk2-ovmf/OVMF_CODE.fd',  # Gentoo and its derivatives
+            '/usr/share/edk2-ovmf/x64/OVMF_CODE.fd',  # Arch Linux and its derivatives
+            '/usr/share/OVMF/OVMF_CODE.fd',  # Debian and its derivatives
+            '/usr/share/edk2/ovmf/OVMF_CODE.fd',  # Fedora (and its derivatives?)
+        ]
+
     for candidate in candidates:
         if os.path.exists(candidate):
             return candidate, None, []
