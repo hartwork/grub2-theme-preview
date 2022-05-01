@@ -170,6 +170,16 @@ def _make_grub_cfg_load_our_theme(grub_cfg_content, source_type, resolution_or_n
                               grub_cfg_content,
                               flags=re.MULTILINE)
 
+    if resolution_or_none is not None:
+        # Get rid of potential overwrites to variable "gfxmode",
+        # in particular case "set gfxmode=auto".
+        grub_cfg_content = re.sub('^([ \\t]*set gfxmode=)(.+)',
+                                  ('\\g<1>%dx%d'
+                                   '  # replaced by grub2-theme-preview, was \\2')
+                                  % resolution_or_none,
+                                  grub_cfg_content,
+                                  flags=re.MULTILINE)
+
     return '\n'.join(prolog_chunks) + grub_cfg_content + '\n'.join(epilog_chunks)
 
 

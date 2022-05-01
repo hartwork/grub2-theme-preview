@@ -11,7 +11,7 @@ from unittest.mock import patch
 
 from parameterized import parameterized
 
-from ..__main__ import main
+from ..__main__ import _make_grub_cfg_load_our_theme, _SourceType, main
 
 
 @contextmanager
@@ -128,3 +128,46 @@ class CliTest(unittest.TestCase):
 
         assertion = self.assertIn if needed_expected else self.assertNotIn
         assertion(needle, stderr.getvalue())
+
+
+class GrubCfgContentProcessingTest(unittest.TestCase):
+
+    def _process_grub_cfg_content(self, grub_cfg_content, resolution_or_none):
+        source_type = _SourceType.DIRECTORY  # arbitrary
+        font_files_to_load = []  # arbitrary
+        timeout_seconds = 123  # arbitrary
+        return _make_grub_cfg_load_our_theme(grub_cfg_content, source_type, resolution_or_none,
+                                             font_files_to_load, timeout_seconds)
+
+    def test_no_custom_resolution(self):
+        grub_cfg_input = ''
+        resolution_or_none = None
+
+        grub_cfg_output = self._process_grub_cfg_content(grub_cfg_input, resolution_or_none)
+
+        self.assertNotIn('gfxmode', grub_cfg_output)
+
+    def test_custom_resolution_with_gfxmode_auto(self):
+        grub_cfg_input = dedent("""\
+            some random line
+            set gfxmode=auto
+            set gfxmode=auto  # with comment
+                set gfxmode=auto  # with indent
+            some random line
+        """)
+        resolution_or_none = (1024, 768)
+
+        grub_cfg_output = self._process_grub_cfg_content(grub_cfg_input, resolution_or_none)
+
+        self.assertNotIn('set gfxmode=auto', grub_cfg_output)
+        self.assertEqual(grub_cfg_output.count('set gfxmode=1024x768'), 1 + 3)
+        self.assertEqual(grub_cfg_output.count('set gfxmode='), 1 + 3)
+
+    def test_custom_resolution_without_gfxmode_auto(self):
+        grub_cfg_input = ''
+        resolution_or_none = (1024, 768)
+
+        grub_cfg_output = self._process_grub_cfg_content(grub_cfg_input, resolution_or_none)
+
+        self.assertIn('set gfxmode=1024x768', grub_cfg_output)
+        self.assertEqual(grub_cfg_output.count('set gfxmode='), 1)
