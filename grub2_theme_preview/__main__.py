@@ -301,6 +301,11 @@ def parse_command_line(argv):
                       help='pass "-display DISPLAY" to QEMU, see "man qemu" for details'
                       ' (default: use QEMU\'s default display)')
 
+    qemu.add_argument('--full-screen',
+                      dest='qemu_full_screen',
+                      action='store_true',
+                      help='pass "-full-screen" to QEMU')
+
     qemu.add_argument('--no-kvm',
                       dest='enable_kvm',
                       default=True,
@@ -308,6 +313,12 @@ def parse_command_line(argv):
                       help='do not pass -enable-kvm to QEMU'
                       ' (and hence fall back to acceleration "tcg"'
                       ' which is significantly slower than KVM)')
+
+    qemu.add_argument('--vga',
+                      dest='qemu_vga',
+                      metavar='CARD',
+                      help='pass "-vga CARD" to QEMU, see "man qemu" for details'
+                      ' (default: use QEMU\'s default VGA card)')
 
     debugging = parser.add_argument_group('debugging arguments')
     debugging.add_argument('--debug',
@@ -508,6 +519,10 @@ def _inner_main(options):
                     run_command.append('-enable-kvm')
                 if options.qemu_display is not None:
                     run_command += ['-display', options.qemu_display]
+                if options.qemu_vga is not None:
+                    run_command += ['-vga', options.qemu_vga]
+                if options.qemu_full_screen:
+                    run_command.append('-full-screen')
                 if is_efi_host:
                     run_command += [
                         '-bios',
