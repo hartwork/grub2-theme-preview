@@ -71,6 +71,8 @@ class CliTest(unittest.TestCase):
         ('without --display', ['--verbose'], '-display sdl', False),
         ('with --vga', ['--verbose', '--vga=virtio'], '-vga virtio', True),
         ('without --vga', ['--verbose'], '-vga virtio', False),
+        ('with --full-screen', ['--verbose', '--full-screen'], '-full-screen', True),
+        ('without --full-screen', ['--verbose'], '-full-screen', False),
         ('with --no-kvm', ['--verbose', '--no-kvm'], '-enable-kvm', False),
         ('without --no-kvm', ['--verbose'], '-enable-kvm', True),
         ('with --add', ['--verbose', '--add', 'foo1=/bar1', '--add',
