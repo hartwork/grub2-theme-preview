@@ -309,6 +309,12 @@ def parse_command_line(argv):
                       ' (and hence fall back to acceleration "tcg"'
                       ' which is significantly slower than KVM)')
 
+    qemu.add_argument('--vga',
+                      dest='qemu_vga',
+                      metavar='CARD',
+                      help='pass "-vga CARD" to QEMU, see "man qemu" for details'
+                      ' (default: use QEMU\'s default VGA card)')
+
     debugging = parser.add_argument_group('debugging arguments')
     debugging.add_argument('--debug',
                            default=False,
@@ -508,6 +514,8 @@ def _inner_main(options):
                     run_command.append('-enable-kvm')
                 if options.qemu_display is not None:
                     run_command += ['-display', options.qemu_display]
+                if options.qemu_vga is not None:
+                    run_command += ['-vga', options.qemu_vga]
                 if is_efi_host:
                     run_command += [
                         '-bios',

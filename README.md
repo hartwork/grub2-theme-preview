@@ -76,6 +76,8 @@ arguments related to invokation of QEMU/KVM:
   --no-kvm              do not pass -enable-kvm to QEMU (and hence fall back
                         to acceleration "tcg" which is significantly slower
                         than KVM)
+  --vga CARD            pass "-vga CARD" to QEMU, see "man qemu" for details
+                        (default: use QEMU's default VGA card)
 
 debugging arguments:
   --debug               enable debugging output
