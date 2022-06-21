@@ -1,43 +1,44 @@
 # About
 
-**grub2-theme-preview** came into life when I was looking around for
+**grub2-theme-preview came into life when I was looking around for
 available GRUB 2.x themes and wanted a way to quickly see a theme
-in action without rebooting real hardware.
+in action without rebooting real hardware.**
 
-It takes a theme folder (or just a single picture),
+**It takes a theme folder ( or just a single picture ),
 creates a temporary bootable image using `grub2-mkrescue` and launches
-that image in a virtual machine using KVM/QEMU, all without root privileges.
+that image in a virtual machine using KVM/QEMU, all without root privileges.**
 
-![grub2-theme-preview showing theme "gutsblack-archlinux"](https://raw.githubusercontent.com/hartwork/grub2-theme-preview/master/screenshots/grub2-theme-preview__gutsblack-archlinux.png)
-
-(Showing theme [gutsblack-archlinux](https://forums.archlinux.fr/viewtopic.php?t=11361))
-
+<p align="center">
+  <img width=50% src="https://raw.githubusercontent.com/hartwork/grub2-theme-preview/master/screenshots/grub2-theme-preview__gutsblack-archlinux.png" alt="screenshot" />
+</p>
+<p align="center">
+  <sub>Showing theme <a href="https://forums.archlinux.fr/viewtopic.php?t=11361">gutsblack-archlinux</a></sub>
+</p>
 
 ## Installation
 
-To install the latest release from [PyPI](https://pypi.org/):
+**First, install these dependencies :**
 
-```console
-# pip install --user grub2-theme-preview
+- **For Debian based systems :**
+```bash
+sudo apt install grub-common ovmf xorriso qemu qemu-system mtools python3 python3-pip
 ```
 
-To install from a Git clone _for development_:
+**To install the latest release from [PyPI](https://pypi.org/) :**
 
-```console
-# pip install --user --editable .
+```
+pip3 install grub2-theme-preview
 ```
 
-Please make sure to install these _non-PyPI dependencies_ as well:
- - `grub-mkrescue` of [GRUB 2](https://www.gnu.org/software/grub/) (package `grub-common` on Debian and Ubuntu)
- - [QEMU](https://wiki.qemu.org/Main_Page) — _hypervisor that performs hardware virtualization_
- - [OVMF](https://github.com/tianocore/tianocore.github.io/wiki/OVMF) — EFI bios image for use with QEMU
- - [mtools](https://www.gnu.org/software/mtools/) — _collection of utilities to access MS-DOS_
- - `xorriso` of [libisoburn](https://dev.lovelyhq.com/libburnia/libisoburn) — _frontend which enables creation and expansion of the ISO format_
+**To install from a Git clone ( for development ) :**
 
+```
+pip3 install --user --editable .
+```
 
 ## Usage
 
-```console
+```
 # grub2-theme-preview --help
 usage: grub2-theme-preview [-h] [--grub-cfg PATH] [--verbose]
                            [--resolution WxH] [--timeout SECONDS]
