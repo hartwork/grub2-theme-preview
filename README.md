@@ -21,21 +21,32 @@ that image in a virtual machine using [KVM](https://www.linux-kvm.org/page/Main_
 
 **🔸 First, install these dependencies :**
 
-- **Debian / Ubuntu**
 ```bash
+# for Debian / Ubuntu
 sudo apt install grub-common ovmf xorriso qemu qemu-system mtools python3 python3-pip
+
+# for Arch
+sudo pacman -S grub-common ovmf xorriso qemu-full mtools python python-pip
 ```
 
 **🔸 To install the latest release from [PyPI](https://pypi.org/project/grub2-theme-preview/) :**
 
-```
+```bash
+# for Debian / Ubuntu
 pip3 install grub2-theme-preview
+
+# for Arch
+pip install grub2-theme-preview
 ```
 
 **🔸 To install from a Git clone ( for development ) :**
 
-```
+```bash
+# for Debian / Ubuntu
 pip3 install --user --editable .
+
+# for Arch
+pip install --user --editable .
 ```
 
 ## 🛠️ Usage
