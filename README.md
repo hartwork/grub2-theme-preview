@@ -1,12 +1,6 @@
-```
-               ___ ___ _   _ ___   _____ _                    ___             _            
-              / __| _ \ | | | _ ) |_   _| |_  ___ _ __  ___  | _ \_ _ _____ _(_)_____ __ __
-             | (_ |   / |_| | _ \   | | | ' \/ -_) '  \/ -_) |  _/ '_/ -_) V / / -_) V  V /
-              \___|_|_\\___/|___/   |_| |_||_\___|_|_|_\___| |_| |_| \___|\_/|_\___|\_/\_/ 
-                                                                               
-```
-
-## 📓 About
+<p align="center">
+  <img height="70" src="https://readme-typing-svg.herokuapp.com?font=Righteous&size=30&color=36B9F7&background=000000&center=true&vCenter=true&lines=GRUB+Theme+Preview+!!" alt="banner" />
+</p>
 
 **[grub2-theme-preview](https://github.com/hartwork/grub2-theme-preview) came into life when I was looking around for
 available GRUB 2.x themes and wanted a way to quickly see a theme
