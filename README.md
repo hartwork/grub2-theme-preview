@@ -41,7 +41,8 @@ pip3 install --user --editable .
 ## 🛠️ Usage
 
 ```
-# grub2-theme-preview --help
+$ grub2-theme-preview --help
+
 usage: grub2-theme-preview [-h] [--grub-cfg PATH] [--verbose]
                            [--resolution WxH] [--timeout SECONDS]
                            [--add TARGET=/SOURCE] [--version]
