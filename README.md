@@ -1,42 +1,50 @@
-# About
+```
+   ___ ___ _   _ ___   _____ _                    ___             _            
+  / __| _ \ | | | _ ) |_   _| |_  ___ _ __  ___  | _ \_ _ _____ _(_)_____ __ __
+ | (_ |   / |_| | _ \   | | | ' \/ -_) '  \/ -_) |  _/ '_/ -_) V / / -_) V  V /
+  \___|_|_\\___/|___/   |_| |_||_\___|_|_|_\___| |_| |_| \___|\_/|_\___|\_/\_/ 
+                                                                               
+```
 
-**grub2-theme-preview came into life when I was looking around for
+## 📓 About
+
+**[grub2-theme-preview](https://github.com/hartwork/grub2-theme-preview) came into life when I was looking around for
 available GRUB 2.x themes and wanted a way to quickly see a theme
 in action without rebooting real hardware.**
 
 **It takes a theme folder ( or just a single picture ),
 creates a temporary bootable image using `grub2-mkrescue` and launches
-that image in a virtual machine using KVM/QEMU, all without root privileges.**
+that image in a virtual machine using [KVM](https://www.linux-kvm.org/page/Main_Page) / [QEMU](https://www.qemu.org/), all without root privileges.**
 
 <p align="center">
   <img width=50% src="https://raw.githubusercontent.com/hartwork/grub2-theme-preview/master/screenshots/grub2-theme-preview__gutsblack-archlinux.png" alt="screenshot" />
 </p>
 <p align="center">
-  <sub>Showing theme <a href="https://forums.archlinux.fr/viewtopic.php?t=11361">gutsblack-archlinux</a></sub>
+  <sub>Theme displayed : <a href="https://forums.archlinux.fr/viewtopic.php?t=11361">gutsblack-archlinux</a></sub>
 </p>
 
-## Installation
+## ⚙️ Installation
 
-**First, install these dependencies :**
+**🔸 First, install these dependencies :**
 
-- **For Debian based systems :**
+- **Debian / Ubuntu**
 ```bash
 sudo apt install grub-common ovmf xorriso qemu qemu-system mtools python3 python3-pip
 ```
 
-**To install the latest release from [PyPI](https://pypi.org/) :**
+**🔸 To install the latest release from [PyPI](https://pypi.org/project/grub2-theme-preview/) :**
 
 ```
 pip3 install grub2-theme-preview
 ```
 
-**To install from a Git clone ( for development ) :**
+**🔸 To install from a Git clone ( for development ) :**
 
 ```
 pip3 install --user --editable .
 ```
 
-## Usage
+## 🛠️ Usage
 
 ```
 # grub2-theme-preview --help
