@@ -15,7 +15,7 @@ jobs:
         python-version: [3.7, 3.11]  # no particular need for in-between versions
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3.1.0
+      - uses: actions/checkout@v3.2.0
 
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4.3.1
