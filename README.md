@@ -1,3 +1,7 @@
+[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
+[![Run Python test suite](https://github.com/hartwork/grub2-theme-preview/actions/workflows/python_test_suite.yml/badge.svg)](https://github.com/hartwork/grub2-theme-preview/actions/workflows/python_test_suite.yml)
+
+
 # About
 
 **grub2-theme-preview** came into life when I was looking around for
