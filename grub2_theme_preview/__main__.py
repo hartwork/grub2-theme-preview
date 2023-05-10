@@ -381,6 +381,7 @@ def _grub2_ovmf_tuple():
             '/usr/share/edk2-ovmf/x64/OVMF_CODE.fd',  # Arch Linux and its derivatives
             '/usr/share/OVMF/OVMF_CODE.fd',  # Debian and its derivatives
             '/usr/share/edk2/ovmf/OVMF_CODE.fd',  # Fedora (and its derivatives?)
+            '/usr/share/qemu/edk2-x86_64-code.fd',  # Void Linux
         ]
 
     for candidate in candidates:
@@ -525,8 +526,7 @@ def _inner_main(options):
                     run_command.append('-full-screen')
                 if is_efi_host:
                     run_command += [
-                        '-bios',
-                        omvf_image_path,
+                        '-drive', f'if=pflash,format=raw,readonly,file={omvf_image_path}'
                     ]
 
                 print('INFO: Please give GRUB a moment to show up in QEMU...')
