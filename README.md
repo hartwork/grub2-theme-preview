@@ -33,7 +33,7 @@ To install from a Git clone _for development_:
 
 Please make sure to install these _non-PyPI dependencies_ as well:
  - `grub-mkrescue` of [GRUB 2](https://www.gnu.org/software/grub/) (package `grub-common` on Debian and Ubuntu)
- - [QEMU](https://wiki.qemu.org/Main_Page) — _hypervisor that performs hardware virtualization_
+ - [QEMU](https://wiki.qemu.org/Main_Page) (with GTK or SDL display support) — _hypervisor that performs hardware virtualization_
  - [OVMF](https://github.com/tianocore/tianocore.github.io/wiki/OVMF) — EFI bios image for use with QEMU
  - [mtools](https://www.gnu.org/software/mtools/) — _collection of utilities to access MS-DOS_
  - `xorriso` of [libisoburn](https://dev.lovelyhq.com/libburnia/libisoburn) — _frontend which enables creation and expansion of the ISO format_
@@ -42,12 +42,13 @@ Please make sure to install these _non-PyPI dependencies_ as well:
 ## Usage
 
 ```console
-# grub2-theme-preview --help
+# COLUMNS=80 grub2-theme-preview --help
 usage: grub2-theme-preview [-h] [--grub-cfg PATH] [--verbose]
                            [--resolution WxH] [--timeout SECONDS]
                            [--add TARGET=/SOURCE] [--version]
                            [--grub2-mkrescue COMMAND] [--qemu COMMAND]
-                           [--xorriso COMMAND] [--no-kvm] [--debug]
+                           [--xorriso COMMAND] [--display DISPLAY]
+                           [--full-screen] [--no-kvm] [--vga CARD] [--debug]
                            [--plain-rescue-image]
                            PATH
 
@@ -55,7 +56,7 @@ positional arguments:
   PATH                  path of theme directory (or PNG/TGA image file) to
                         preview
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
   --grub-cfg PATH       path of custom grub.cfg file to use (default:
                         /boot/grub{2,}/grub.cfg)
@@ -76,7 +77,8 @@ command location arguments:
 
 arguments related to invokation of QEMU/KVM:
   --display DISPLAY     pass "-display DISPLAY" to QEMU, see "man qemu" for
-                        details (default: use QEMU's default display)
+                        details (default: use QEMU's default display,
+                        hopefully either GTK or SDL)
   --full-screen         pass "-full-screen" to QEMU
   --no-kvm              do not pass -enable-kvm to QEMU (and hence fall back
                         to acceleration "tcg" which is significantly slower
