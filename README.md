@@ -33,7 +33,7 @@ To install from a Git clone _for development_:
 
 Please make sure to install these _non-PyPI dependencies_ as well:
  - `grub-mkrescue` of [GRUB 2](https://www.gnu.org/software/grub/) (package `grub-common` on Debian and Ubuntu)
- - [QEMU](https://wiki.qemu.org/Main_Page) — _hypervisor that performs hardware virtualization_
+ - [QEMU](https://wiki.qemu.org/Main_Page) (with GTK or SDL display support) — _hypervisor that performs hardware virtualization_
  - [OVMF](https://github.com/tianocore/tianocore.github.io/wiki/OVMF) — EFI bios image for use with QEMU
  - [mtools](https://www.gnu.org/software/mtools/) — _collection of utilities to access MS-DOS_
  - `xorriso` of [libisoburn](https://dev.lovelyhq.com/libburnia/libisoburn) — _frontend which enables creation and expansion of the ISO format_

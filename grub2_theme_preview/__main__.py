@@ -299,7 +299,7 @@ def parse_command_line(argv):
                       dest='qemu_display',
                       metavar='DISPLAY',
                       help='pass "-display DISPLAY" to QEMU, see "man qemu" for details'
-                      ' (default: use QEMU\'s default display)')
+                      ' (default: use QEMU\'s default display, hopefully either GTK or SDL)')
 
     qemu.add_argument('--full-screen',
                       dest='qemu_full_screen',
