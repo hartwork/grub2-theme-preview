@@ -42,7 +42,7 @@ Please make sure to install these _non-PyPI dependencies_ as well:
 ## Usage
 
 ```console
-# grub2-theme-preview --help
+# COLUMNS=80 grub2-theme-preview --help
 usage: grub2-theme-preview [-h] [--grub-cfg PATH] [--verbose]
                            [--resolution WxH] [--timeout SECONDS]
                            [--add TARGET=/SOURCE] [--version]
