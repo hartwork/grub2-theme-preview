@@ -12,7 +12,7 @@ import subprocess
 import sys
 import tempfile
 import traceback
-from argparse import ArgumentParser
+from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from enum import Enum
 from textwrap import dedent
 
@@ -251,7 +251,23 @@ validate_grub2_mkrescue_addition.__name__ = 'grub2-mkrescue addition'
 
 
 def parse_command_line(argv):
-    parser = ArgumentParser(prog='grub2-theme-preview')
+    parser = ArgumentParser(prog='grub2-theme-preview',
+                            formatter_class=RawDescriptionHelpFormatter,
+                            description=dedent("""\
+        Preview a GRUB 2.x theme using KVM/QEMU
+    """),
+                            epilog=dedent("""\
+        environment variables:
+          G2TP_GRUB_LIB         Path of GRUB platform files parent directory
+                                (default: "/usr/lib/grub")
+          G2TP_OVMF_IMAGE       Path of OVMF image file (default: auto-detect)
+                                (e.g. "/usr/share/[..]/OVMF_CODE.fd")
+
+        Software libre licensed under GPL v2 or later.
+        Brought to you by Sebastian Pipping <sebastian@pipping.org>.
+
+        Please report bugs at https://github.com/hartwork/grub2-theme-preview -- thank you!
+    """))
     parser.add_argument(
         '--grub-cfg',
         metavar='PATH',

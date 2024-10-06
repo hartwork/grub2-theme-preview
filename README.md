@@ -52,6 +52,8 @@ usage: grub2-theme-preview [-h] [--grub-cfg PATH] [--verbose]
                            [--plain-rescue-image]
                            PATH
 
+Preview a GRUB 2.x theme using KVM/QEMU
+
 positional arguments:
   PATH                  path of theme directory (or PNG/TGA image file) to
                         preview
@@ -91,4 +93,15 @@ debugging arguments:
   --plain-rescue-image  use unprocessed GRUB rescue image with no theme
                         patched in; useful for checking if a plain GRUB rescue
                         image shows up a GRUB shell, successfully.
+
+environment variables:
+  G2TP_GRUB_LIB         Path of GRUB platform files parent directory
+                        (default: "/usr/lib/grub")
+  G2TP_OVMF_IMAGE       Path of OVMF image file (default: auto-detect)
+                        (e.g. "/usr/share/[..]/OVMF_CODE.fd")
+
+Software libre licensed under GPL v2 or later.
+Brought to you by Sebastian Pipping <sebastian@pipping.org>.
+
+Please report bugs at https://github.com/hartwork/grub2-theme-preview -- thank you!
 ```
