@@ -480,7 +480,9 @@ def _inner_main(options):
                 package_names_hint = ' or '.join(
                     repr(package_name) for package_name in omvf_candidate_package_names)
                 raise OSError(errno.ENOENT, (f'OVMF image file "{omvf_image_path_hint}" is missing'
-                                             f', please install package {package_names_hint}.'))
+                                             f'; hint: please install package {package_names_hint}'
+                                             ' and/or set environment variable G2TP_OVMF_IMAGE'
+                                             ' to the correct image location.'))
             print(f'INFO: Found OVMF image at {omvf_image_path!r}.')
 
         try:
