@@ -468,7 +468,9 @@ def _inner_main(options):
         grub2_platform_directory = _grub2_directory(grub2_platform)
         if not os.path.exists(grub2_platform_directory):
             raise OSError(errno.ENOENT,
-                          f'GRUB platform directory "{grub2_platform_directory}" not found')
+                          (f'GRUB platform directory "{grub2_platform_directory}" not found'
+                           "; hint: please install the related GRUB 2.x package"
+                           " and/or set environment variable G2TP_GRUB_LIB to the correct path."))
 
         is_efi_host = 'efi' in grub2_platform
         if is_efi_host:
