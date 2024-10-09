@@ -12,7 +12,7 @@ import subprocess
 import sys
 import tempfile
 import traceback
-from argparse import ArgumentParser
+from argparse import ArgumentParser, RawDescriptionHelpFormatter
 from enum import Enum
 from textwrap import dedent
 
@@ -251,7 +251,23 @@ validate_grub2_mkrescue_addition.__name__ = 'grub2-mkrescue addition'
 
 
 def parse_command_line(argv):
-    parser = ArgumentParser(prog='grub2-theme-preview')
+    parser = ArgumentParser(prog='grub2-theme-preview',
+                            formatter_class=RawDescriptionHelpFormatter,
+                            description=dedent("""\
+        Preview a GRUB 2.x theme using KVM/QEMU
+    """),
+                            epilog=dedent("""\
+        environment variables:
+          G2TP_GRUB_LIB         Path of GRUB platform files parent directory
+                                (default: "/usr/lib/grub")
+          G2TP_OVMF_IMAGE       Path of OVMF image file (default: auto-detect)
+                                (e.g. "/usr/share/[..]/OVMF_CODE.fd")
+
+        Software libre licensed under GPL v2 or later.
+        Brought to you by Sebastian Pipping <sebastian@pipping.org>.
+
+        Please report bugs at https://github.com/hartwork/grub2-theme-preview -- thank you!
+    """))
     parser.add_argument(
         '--grub-cfg',
         metavar='PATH',
@@ -452,7 +468,9 @@ def _inner_main(options):
         grub2_platform_directory = _grub2_directory(grub2_platform)
         if not os.path.exists(grub2_platform_directory):
             raise OSError(errno.ENOENT,
-                          'GRUB platform directory "%s" not found' % grub2_platform_directory)
+                          (f'GRUB platform directory "{grub2_platform_directory}" not found'
+                           "; hint: please install the related GRUB 2.x package"
+                           " and/or set environment variable G2TP_GRUB_LIB to the correct path."))
 
         is_efi_host = 'efi' in grub2_platform
         if is_efi_host:
@@ -461,9 +479,10 @@ def _inner_main(options):
             if omvf_image_path is None:
                 package_names_hint = ' or '.join(
                     repr(package_name) for package_name in omvf_candidate_package_names)
-                raise OSError(
-                    errno.ENOENT, 'OVMF image file "%s" is missing, please install package %s.' %
-                    (omvf_image_path_hint, package_names_hint))
+                raise OSError(errno.ENOENT, (f'OVMF image file "{omvf_image_path_hint}" is missing'
+                                             f'; hint: please install package {package_names_hint}'
+                                             ' and/or set environment variable G2TP_OVMF_IMAGE'
+                                             ' to the correct image location.'))
             print(f'INFO: Found OVMF image at {omvf_image_path!r}.')
 
         try:
