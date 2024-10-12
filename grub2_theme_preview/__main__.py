@@ -546,7 +546,7 @@ def _inner_main(options):
                     run_command.append('-full-screen')
                 if is_efi_host:
                     run_command += [
-                        '-drive', f'if=pflash,format=raw,readonly,file={omvf_image_path}'
+                        '-drive', f'if=pflash,format=raw,readonly=on,file={omvf_image_path}'
                     ]
 
                 print('INFO: Please give GRUB a moment to show up in QEMU...')
