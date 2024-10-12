@@ -399,6 +399,9 @@ def _grub2_ovmf_tuple():
             '/usr/share/OVMF/OVMF_CODE_4M.fd',  # Debian and its derivatives
             '/usr/share/edk2/ovmf/OVMF_CODE.fd',  # Fedora (and its derivatives?)
             '/usr/share/qemu/edk2-x86_64-code.fd',  # Void Linux
+            '/usr/share/qemu/ovmf-x86_64.bin',  # openSUSE (and its derivatives?)
+            '/usr/share/qemu/ovmf-x86_64-4m.bin',  # openSUSE (and its derivatives?)
+            '/usr/share/qemu/ovmf-x86_64-sev.bin',  # openSUSE (and its derivatives?)
         ]
 
     for candidate in candidates:
