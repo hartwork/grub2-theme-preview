@@ -365,8 +365,17 @@ def parse_command_line(argv):
     return options
 
 
-def _grub2_directory(platform):
-    return '{}/{}'.format(os.environ.get('G2TP_GRUB_LIB', '/usr/lib/grub'), platform)
+def _candidate_grub2_image_directories(platform):
+    try:
+        candidate_dirs = [
+            os.environ['G2TP_GRUB_LIB'],
+        ]
+    except KeyError:
+        candidate_dirs = [
+            '/usr/share/grub2',  # openSUSE
+            '/usr/lib/grub',  # everyone else
+        ]
+    return [f'{d}/{platform}' for d in candidate_dirs]
 
 
 def _grub2_platform():
@@ -468,10 +477,13 @@ def _inner_main(options):
             f.write(grub_cfg_content)
 
         grub2_platform = _grub2_platform()
-        grub2_platform_directory = _grub2_directory(grub2_platform)
-        if not os.path.exists(grub2_platform_directory):
+        for grub2_platform_directory in _candidate_grub2_image_directories(grub2_platform):
+            if os.path.exists(grub2_platform_directory):
+                print(f'INFO: Found GRUB 2.x image directory at {grub2_platform_directory!r}.')
+                break
+        else:
             raise OSError(errno.ENOENT,
-                          (f'GRUB platform directory "{grub2_platform_directory}" not found'
+                          (f'GRUB 2.x image directory "{grub2_platform_directory}" not found'
                            "; hint: please install the related GRUB 2.x package"
                            " and/or set environment variable G2TP_GRUB_LIB to the correct path."))
 
