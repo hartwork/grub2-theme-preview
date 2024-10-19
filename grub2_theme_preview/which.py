@@ -6,10 +6,10 @@ import os
 
 
 def which(command):
-    if '/' in command:
+    if "/" in command:
         return command
 
-    for folder in os.environ['PATH'].split(':'):
+    for folder in os.environ["PATH"].split(":"):
         candidate = os.path.join(folder, command)
 
         if not os.path.isfile(candidate):
