@@ -2,4 +2,4 @@
 # Licensed under GPL v2 or later
 
 _VERSION = (2, 8, 0)
-VERSION_STR = '.'.join([str(e) for e in _VERSION])
+VERSION_STR = ".".join([str(e) for e in _VERSION])
