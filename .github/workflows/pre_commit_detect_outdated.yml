@@ -27,7 +27,7 @@ jobs:
 
       - name: Install pre-commit
         run: |-
-          pip install \
+          pip3 install \
             --disable-pip-version-check \
             --no-warn-script-location \
             --user \

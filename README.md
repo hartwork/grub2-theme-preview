@@ -23,13 +23,13 @@ that image in a virtual machine using KVM/QEMU, all without root privileges.
 To install the latest release from [PyPI](https://pypi.org/):
 
 ```console
-# pip install --user grub2-theme-preview
+# pip3 install --user grub2-theme-preview
 ```
 
 To install from a Git clone _for development_:
 
 ```console
-# pip install --user --editable .
+# pip3 install --user --editable .
 ```
 
 Please make sure to install these _non-PyPI dependencies_ as well:
