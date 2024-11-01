@@ -1,5 +1,6 @@
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
 [![Run Python test suite](https://github.com/hartwork/grub2-theme-preview/actions/workflows/python_test_suite.yml/badge.svg)](https://github.com/hartwork/grub2-theme-preview/actions/workflows/python_test_suite.yml)
+[![Packaging status](https://repology.org/badge/tiny-repos/grub2-theme-preview.svg)](https://repology.org/project/grub2-theme-preview/versions)
 
 
 # About
@@ -22,13 +23,13 @@ that image in a virtual machine using KVM/QEMU, all without root privileges.
 To install the latest release from [PyPI](https://pypi.org/):
 
 ```console
-# pip install --user grub2-theme-preview
+# pip3 install --user grub2-theme-preview
 ```
 
 To install from a Git clone _for development_:
 
 ```console
-# pip install --user --editable .
+# pip3 install --user --editable .
 ```
 
 Please make sure to install these _non-PyPI dependencies_ as well:
