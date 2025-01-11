@@ -296,8 +296,7 @@ def parse_command_line(argv):
         dest="timeout_seconds",
         type=timeout,
         default=30,
-        help="set GRUB timeout in whole seconds or -1 to disable"
-        " (default: %(default)s seconds)",
+        help="set GRUB timeout in whole seconds or -1 to disable (default: %(default)s seconds)",
     )
     parser.add_argument(
         "--add",
