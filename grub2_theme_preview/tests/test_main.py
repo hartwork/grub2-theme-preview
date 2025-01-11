@@ -20,7 +20,7 @@ def path_inserted(path):
     Context manager that inserts ``path`` at the start of ``${PATH}``
     """
     original_path = os.environ["PATH"]
-    new_path = f'{path}{os.pathsep}{os.environ["PATH"]}'
+    new_path = f"{path}{os.pathsep}{os.environ['PATH']}"
 
     os.environ["PATH"] = new_path
     try:
