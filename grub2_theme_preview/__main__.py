@@ -433,7 +433,9 @@ def _grub2_ovmf_tuple():
     else:
         candidates = [
             "/usr/share/edk2-ovmf/OVMF_CODE.fd",  # Gentoo and its derivatives
-            "/usr/share/edk2-ovmf/x64/OVMF_CODE.fd",  # Arch Linux and its derivatives
+            "/usr/share/edk2-ovmf/x64/OVMF_CODE.fd",  # Older Arch Linux and its derivatives
+            "/usr/share/edk2/x64/OVMF.4m.fd",  # Arch Linux and its derivatives
+            "/usr/share/edk2/x64/OVMF_CODE.4m.fd",  # Arch Linux and its derivatives
             "/usr/share/OVMF/OVMF_CODE.fd",  # Older Debian and its derivatives
             "/usr/share/OVMF/OVMF_CODE_4M.fd",  # Debian and its derivatives
             "/usr/share/edk2/ovmf/OVMF_CODE.fd",  # Fedora (and its derivatives?)
