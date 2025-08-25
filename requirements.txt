@@ -1,5 +1,5 @@
 # Direct dependencies
-coverage==7.10.4
+coverage==7.10.5
 parameterized==0.9.0
 pytest==8.4.1
 
