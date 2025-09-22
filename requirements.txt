@@ -11,7 +11,7 @@ iniconfig==2.1.0
 packaging==25.0
 pluggy==1.6.0
 Pygments==2.19.2
-pyparsing==3.2.4
+pyparsing==3.2.5
 tomli==2.2.1
 typing-extensions==4.15.0
 zipp==3.23.0
