@@ -19,19 +19,4 @@ jobs:
         with:
           python-version: 3.14
 
-      - name: Install pre-commit
-        run: |-
-          pip3 install \
-            --disable-pip-version-check \
-            --user \
-            --no-warn-script-location \
-            pre-commit
-          echo "PATH=${HOME}/.local/bin:${PATH}" >> "${GITHUB_ENV}"
-
-      - name: Install pre-commit hooks
-        run: |-
-          pre-commit install --install-hooks
-
-      - name: Run pre-commit on all files
-        run: |-
-          pre-commit run --all-files --show-diff-on-failure
+      - uses: pre-commit/action@v3.0.1
