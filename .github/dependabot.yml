@@ -24,7 +24,7 @@ updates:
     schedule:
       interval: "daily"
 
-  - package-ecosystem: pre-commit
+  - package-ecosystem: "pre-commit"
     commit-message:
       include: "scope"
       prefix: "pre-commit"
