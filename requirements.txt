@@ -14,4 +14,4 @@ Pygments==2.20.0
 pyparsing==3.3.2
 tomli==2.4.1
 typing-extensions==4.15.0
-zipp==3.23.0
+zipp==3.23.1
