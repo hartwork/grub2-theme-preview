@@ -157,10 +157,10 @@ def _make_grub_cfg_load_our_theme(
         "insmod jpeg",
     ]
 
-    term_out_terminal = (
-        "terminal_output gfxterm serial console"
-        if save_grub_debug else "terminal_output gfxterm"
-    )
+    if save_grub_debug:
+        term_out_terminal = "terminal_output gfxterm serial console"
+    else:
+        term_out_terminal = "terminal_output gfxterm"
 
     if resolution_or_none is not None:
         # We need to be the first call to 'terminal_output gfxterm'
@@ -546,10 +546,11 @@ def _inner_main(options):
     else:
         font_files_to_load = list(iterate_pf2_files_relative(normalized_source))
 
-    guest_serial_capture_path = (
-        os.path.abspath(os.path.join(os.getcwd(), _GRUB_DEBUG_FILE))
-        if options.save_grub_debug else None
-    )
+    if options.save_grub_debug:
+        guest_serial_capture_path = os.path.abspath(os.path.join(os.getcwd(), _GRUB_DEBUG_FILE))
+    else:
+        guest_serial_capture_path = None
+
 
     abs_grub_cfg_or_none = options.grub_cfg and os.path.abspath(options.grub_cfg)
     grub_cfg_content = _make_final_grub_cfg_content(
