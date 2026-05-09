@@ -103,11 +103,23 @@ def _generate_dummy_menu_entries():
             reboot
         }
 
+        menuentry 'FreeBSD' --class freebsd --class bsd --class os {
+            reboot
+        }
+
         menuentry 'Gentoo' --class gentoo --class gnu-linux --class linux --class gnu --class os {
             reboot
         }
 
         menuentry "Memtest86+" --class memtest {
+            reboot
+        }
+
+        menuentry "Windows" --class windows --class os {
+            reboot
+        }
+
+        menuentry "macOS" --class macos --class darwin --class os {
             reboot
         }
     """)
