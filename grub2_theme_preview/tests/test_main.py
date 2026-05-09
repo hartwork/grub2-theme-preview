@@ -11,7 +11,7 @@ from unittest.mock import patch
 
 from parameterized import parameterized
 
-from ..__main__ import main
+from ..__main__ import _GRUB_DEBUG_FILE, _GRUB_DEBUG_SPEC, main
 
 
 @contextmanager
@@ -98,6 +98,18 @@ class CliTest(unittest.TestCase):
                 False,
             ),
             ("without --plain-rescue-image", ["--verbose"], " boot/grub/grub.cfg=", True),
+            (
+                "with --save-grub-debug",
+                ["--verbose", "--save-grub-debug"],
+                "file:",
+                True,
+            ),
+            (
+                "without --save-grub-debug qemu file backend",
+                ["--verbose"],
+                "file:",
+                False,
+            ),
         ]
     )
     def test_argument_effect__stdout(self, _label, extra_argv, needle, needed_expected):
@@ -138,6 +150,58 @@ class CliTest(unittest.TestCase):
 
             assertion = self.assertIn if needed_expected else self.assertNotIn
             assertion(needle, stderr.getvalue())
+
+    def test_save_grub_debug_stderr_grub_cfg_has_debug_spec_and_serial(self):
+        with TemporaryDirectory() as tempdir:
+            argv = [None, "--qemu", "true", "--debug", "--save-grub-debug", tempdir]
+            with (
+                patch("sys.stdout", StringIO()),
+                patch("sys.stderr", StringIO()) as stderr,
+                fake_grub2_mkrescue(),
+            ):
+                main(argv)
+            dump = stderr.getvalue()
+            self.assertIn("set debug=%s" % _GRUB_DEBUG_SPEC, dump)
+            self.assertIn("serial --unit=0", dump)
+
+    def test_without_save_grub_debug_stderr_grub_cfg_skips_serial_and_set_debug(self):
+        with TemporaryDirectory() as tempdir:
+            argv = [None, "--qemu", "true", "--debug", tempdir]
+            with (
+                patch("sys.stdout", StringIO()),
+                patch("sys.stderr", StringIO()) as stderr,
+                fake_grub2_mkrescue(),
+            ):
+                main(argv)
+            dump = stderr.getvalue()
+            self.assertNotIn("set debug=", dump)
+            self.assertNotIn("serial --unit=0", dump)
+
+    def test_save_grub_debug_truncates_existing_grub_debug_txt(self):
+        with TemporaryDirectory() as tempcwd:
+            with TemporaryDirectory() as theme_dir:
+                with open(os.path.join(theme_dir, "theme.txt"), "w") as tf:
+                    tf.write("# minimal theme\n")
+                capture = os.path.join(tempcwd, _GRUB_DEBUG_FILE)
+                with open(capture, "w") as xf:
+                    xf.write("discard-me")
+
+                cwd_before = os.getcwd()
+                os.chdir(tempcwd)
+                try:
+                    argv = [None, "--qemu", "true", "--save-grub-debug", theme_dir]
+                    with (
+                        patch("sys.stdout", StringIO()),
+                        patch("sys.stderr", StringIO()),
+                        fake_grub2_mkrescue(),
+                    ):
+                        main(argv)
+                finally:
+                    os.chdir(cwd_before)
+
+            self.assertTrue(os.path.isfile(capture))
+            with open(capture, "rb") as f:
+                self.assertEqual(f.read(), b"")
 
     @parameterized.expand(
         [

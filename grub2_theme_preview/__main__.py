@@ -23,6 +23,8 @@ _PATH_IMAGE_ONLY_PNG = "themes/DEMO.png"
 _PATH_IMAGE_ONLY_TGA = "themes/DEMO.tga"
 _PATH_IMAGE_ONLY_JPEG = "themes/DEMO.jpeg"
 _PATH_FULL_THEME = "themes/DEMO"
+_GRUB_DEBUG_SPEC = "all,-scripting,-lexer,-efidisk,-verify"
+_GRUB_DEBUG_FILE = "grub-debug.txt"
 
 _KILL_BY_SIGNAL = 128
 
@@ -112,14 +114,25 @@ def _generate_dummy_menu_entries():
 
 
 def _make_grub_cfg_load_our_theme(
-    grub_cfg_content, source_type, resolution_or_none, font_files_to_load, timeout_seconds
+    grub_cfg_content,
+    source_type,
+    resolution_or_none,
+    font_files_to_load,
+    timeout_seconds,
+    save_grub_debug=False,
 ):
     # NOTE: The last font loaded becomes the default/fallback font
     #       So if we load fonts first, the remaining default font
     #       will remain unchanged and the theme will display unchanged.
-    prolog_chunks = [
-        "loadfont $prefix/fonts/unicode.pf2",
-    ]
+    prolog_chunks = []
+    if save_grub_debug:
+        prolog_chunks.append("set debug=%s" % _GRUB_DEBUG_SPEC)
+        prolog_chunks.append(
+            # COM1: QEMU attaches -serial file:... for --save-grub-debug captures
+            "serial --unit=0 --speed=115200 --word=8 --parity=no --stop=1",
+        )
+
+    prolog_chunks.append("loadfont $prefix/fonts/unicode.pf2")
 
     for relative_path in font_files_to_load:
         prolog_chunks.append(f"loadfont $prefix/{_PATH_FULL_THEME}/{relative_path}")
@@ -132,11 +145,18 @@ def _make_grub_cfg_load_our_theme(
         "insmod jpeg",
     ]
 
+    term_out_terminal = (
+        "terminal_output gfxterm serial console"
+        if save_grub_debug else "terminal_output gfxterm"
+    )
+
     if resolution_or_none is not None:
         # We need to be the first call to 'terminal_output gfxterm'
         # if we want to have a say with resolution
         prolog_chunks.append("set gfxmode=%dx%d" % resolution_or_none)
-        prolog_chunks.append("terminal_output gfxterm")
+        if save_grub_debug:
+            prolog_chunks.append("terminal_input console serial")
+        prolog_chunks.append(term_out_terminal)
 
     prolog_chunks.append("")  # blank line
     prolog_chunks.append("")  # trailing new line
@@ -156,7 +176,9 @@ def _make_grub_cfg_load_our_theme(
     if resolution_or_none is None:
         # If we haven't ensured GFX mode earlier, do it now
         # so it's done at least once
-        epilog_chunks.append("terminal_output gfxterm")
+        if save_grub_debug:
+            epilog_chunks.append("terminal_input console serial")
+        epilog_chunks.append(term_out_terminal)
 
     if source_type == _SourceType.DIRECTORY:
         epilog_chunks.append("set theme=$prefix/%s/theme.txt" % _PATH_FULL_THEME)
@@ -176,7 +198,12 @@ def _make_grub_cfg_load_our_theme(
 
 
 def _make_final_grub_cfg_content(
-    source_type, source_grub_cfg, resolution_or_none, font_files_to_load, timeout_seconds
+    source_type,
+    source_grub_cfg,
+    resolution_or_none,
+    font_files_to_load,
+    timeout_seconds,
+    save_grub_debug=False,
 ):
     if source_grub_cfg is not None:
         files_to_try_to_read = [source_grub_cfg]
@@ -215,7 +242,12 @@ def _make_final_grub_cfg_content(
         content = _generate_dummy_menu_entries()
 
     return _make_grub_cfg_load_our_theme(
-        content, source_type, resolution_or_none, font_files_to_load, timeout_seconds
+        content,
+        source_type,
+        resolution_or_none,
+        font_files_to_load,
+        timeout_seconds,
+        save_grub_debug,
     )
 
 
@@ -376,6 +408,17 @@ def parse_command_line(argv):
         "useful for checking if a plain GRUB rescue image"
         " shows up a GRUB shell, successfully.",
     )
+    debugging.add_argument(
+        "--save-grub-debug",
+        dest="save_grub_debug",
+        default=False,
+        action="store_true",
+        help=(
+            "QEMU `-serial file` writes guest COM1 to %s (cwd, truncated each "
+            "run); grub.cfg gains set debug=%s and terminals that mirror to serial."
+            % (_GRUB_DEBUG_FILE, _GRUB_DEBUG_SPEC)
+        ),
+    )
 
     options = parser.parse_args(argv[1:])
 
@@ -491,6 +534,11 @@ def _inner_main(options):
     else:
         font_files_to_load = list(iterate_pf2_files_relative(normalized_source))
 
+    guest_serial_capture_path = (
+        os.path.abspath(os.path.join(os.getcwd(), _GRUB_DEBUG_FILE))
+        if options.save_grub_debug else None
+    )
+
     abs_grub_cfg_or_none = options.grub_cfg and os.path.abspath(options.grub_cfg)
     grub_cfg_content = _make_final_grub_cfg_content(
         source_type,
@@ -498,6 +546,7 @@ def _inner_main(options):
         options.resolution,
         font_files_to_load,
         options.timeout_seconds,
+        options.save_grub_debug,
     )
     if options.debug:
         _dump_grub_cfg_content(grub_cfg_content, target=sys.stderr)
@@ -604,6 +653,16 @@ def _inner_main(options):
                     run_command += ["-vga", options.qemu_vga]
                 if options.qemu_full_screen:
                     run_command.append("-full-screen")
+                if guest_serial_capture_path is not None:
+                    try:
+                        with open(guest_serial_capture_path, "wb"):
+                            pass
+                    except OSError as e:
+                        raise OSError(
+                            errno.EIO,
+                            f"cannot create or truncate grub serial capture '{guest_serial_capture_path}': {e}",
+                        )
+                    run_command.extend(["-serial", f"file:{guest_serial_capture_path}"])
                 if is_efi_host:
                     run_command += [
                         "-drive",
@@ -616,6 +675,11 @@ def _inner_main(options):
 
                 if qemu_exit_code not in (0, _KILL_BY_SIGNAL + signal.SIGINT):
                     raise RuntimeError(f"QEMU exited with code {qemu_exit_code}.")
+                if guest_serial_capture_path is not None:
+                    print(
+                        'INFO: Wrote guest serial / GRUB trace to "%s".'
+                        % guest_serial_capture_path
+                    )
             finally:
                 with contextlib.suppress(OSError):
                     os.remove(abs_tmp_img_file)
