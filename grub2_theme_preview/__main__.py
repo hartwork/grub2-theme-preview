@@ -551,7 +551,6 @@ def _inner_main(options):
     else:
         guest_serial_capture_path = None
 
-
     abs_grub_cfg_or_none = options.grub_cfg and os.path.abspath(options.grub_cfg)
     grub_cfg_content = _make_final_grub_cfg_content(
         source_type,
@@ -673,8 +672,12 @@ def _inner_main(options):
                     except OSError as e:
                         raise OSError(
                             errno.EIO,
-                            f"cannot create or truncate grub serial capture '{guest_serial_capture_path}': {e}",
+                            (
+                                "cannot create or truncate grub serial capture "
+                                f"'{guest_serial_capture_path}': {e}"
+                            ),
                         )
+
                     run_command.extend(["-serial", f"file:{guest_serial_capture_path}"])
                 if is_efi_host:
                     run_command += [
