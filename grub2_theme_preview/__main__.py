@@ -693,7 +693,7 @@ def _inner_main(options):
                     raise RuntimeError(f"QEMU exited with code {qemu_exit_code}.")
                 if guest_serial_capture_path is not None:
                     print(
-                        'INFO: Wrote guest serial / GRUB trace to "%s".'
+                        'INFO: Wrote the virtual machine's serial log (with the GRUB debug output) to file "%s".'
                         % guest_serial_capture_path
                     )
             finally:
