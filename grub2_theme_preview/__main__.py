@@ -23,7 +23,7 @@ _PATH_IMAGE_ONLY_PNG = "themes/DEMO.png"
 _PATH_IMAGE_ONLY_TGA = "themes/DEMO.tga"
 _PATH_IMAGE_ONLY_JPEG = "themes/DEMO.jpeg"
 _PATH_FULL_THEME = "themes/DEMO"
-_GRUB_DEBUG_SPEC = "all,-scripting,-lexer,-efidisk,-verify"
+_GRUB_DEBUG_SPEC = "all,-efidisk,-lexer,-scripting,-verify"
 _GRUB_DEBUG_FILE = "grub-debug.txt"
 
 _KILL_BY_SIGNAL = 128
