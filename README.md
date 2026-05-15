@@ -2,6 +2,18 @@
 [![Run Python test suite](https://github.com/hartwork/grub2-theme-preview/actions/workflows/python_test_suite.yml/badge.svg)](https://github.com/hartwork/grub2-theme-preview/actions/workflows/python_test_suite.yml)
 [![Packaging status](https://repology.org/badge/tiny-repos/grub2-theme-preview.svg)](https://repology.org/project/grub2-theme-preview/versions)
 
+> [!IMPORTANT]
+> This project is in **maintenance mode**. That means that I will:
+>
+> - :white_check_mark: continue to apply dependency updates and bug fixes, but will
+> - :no_entry_sign: not add any new features, and will
+> - :no_entry_sign: not take time to review pull requests adding features
+>   or making bigger changes.
+>
+> Thanks for your understanding! :pray:
+>
+> Sebastian Pipping — Berlin, 2026-05-15
+
 
 # About
 
