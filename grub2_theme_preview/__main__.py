@@ -157,18 +157,18 @@ def _make_grub_cfg_load_our_theme(
         "insmod jpeg",
     ]
 
+    terminal_input_line = "terminal_input console serial"
+    terminal_output_line = "terminal_output gfxterm"
     if save_grub_debug:
-        term_out_terminal = "terminal_output gfxterm serial console"
-    else:
-        term_out_terminal = "terminal_output gfxterm"
+        terminal_output_line += " serial console"
 
     if resolution_or_none is not None:
         # We need to be the first call to 'terminal_output gfxterm'
         # if we want to have a say with resolution
         prolog_chunks.append("set gfxmode=%dx%d" % resolution_or_none)
         if save_grub_debug:
-            prolog_chunks.append("terminal_input console serial")
-        prolog_chunks.append(term_out_terminal)
+            prolog_chunks.append(terminal_input_line)
+        prolog_chunks.append(terminal_output_line)
 
     prolog_chunks.append("")  # blank line
     prolog_chunks.append("")  # trailing new line
@@ -189,8 +189,8 @@ def _make_grub_cfg_load_our_theme(
         # If we haven't ensured GFX mode earlier, do it now
         # so it's done at least once
         if save_grub_debug:
-            epilog_chunks.append("terminal_input console serial")
-        epilog_chunks.append(term_out_terminal)
+            epilog_chunks.append(terminal_input_line)
+        epilog_chunks.append(terminal_output_line)
 
     if source_type == _SourceType.DIRECTORY:
         epilog_chunks.append("set theme=$prefix/%s/theme.txt" % _PATH_FULL_THEME)
