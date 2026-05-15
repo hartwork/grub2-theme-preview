@@ -133,9 +133,6 @@ def _make_grub_cfg_load_our_theme(
     timeout_seconds,
     save_grub_debug=False,
 ):
-    # NOTE: The last font loaded becomes the default/fallback font
-    #       So if we load fonts first, the remaining default font
-    #       will remain unchanged and the theme will display unchanged.
     prolog_chunks = []
     if save_grub_debug:
         prolog_chunks.append("set debug=%s" % _GRUB_DEBUG_SPEC)
@@ -144,6 +141,9 @@ def _make_grub_cfg_load_our_theme(
             "serial --unit=0 --speed=115200 --word=8 --parity=no --stop=1",
         )
 
+    # NOTE: The last font loaded becomes the default/fallback font
+    #       So if we load fonts first, the remaining default font
+    #       will remain unchanged and the theme will display unchanged.
     prolog_chunks.append("loadfont $prefix/fonts/unicode.pf2")
 
     for relative_path in font_files_to_load:
