@@ -111,15 +111,15 @@ def _generate_dummy_menu_entries():
             reboot
         }
 
-        menuentry "Memtest86+" --class memtest {
+        menuentry 'macOS' --class macos --class darwin --class os {
             reboot
         }
 
-        menuentry "Windows" --class windows --class os {
+        menuentry 'Memtest86+' --class memtest {
             reboot
         }
 
-        menuentry "macOS" --class macos --class darwin --class os {
+        menuentry 'Windows' --class windows --class os {
             reboot
         }
     """)
