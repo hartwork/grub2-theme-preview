@@ -673,7 +673,7 @@ def _inner_main(options):
                         raise OSError(
                             errno.EIO,
                             (
-                                "cannot create or truncate grub serial capture "
+                                "Cannot create or truncate grub serial capture "
                                 f"'{guest_serial_capture_path}': {e}"
                             ),
                         )
