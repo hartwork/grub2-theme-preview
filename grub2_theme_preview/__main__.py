@@ -24,7 +24,6 @@ _PATH_IMAGE_ONLY_TGA = "themes/DEMO.tga"
 _PATH_IMAGE_ONLY_JPEG = "themes/DEMO.jpeg"
 _PATH_FULL_THEME = "themes/DEMO"
 _GRUB_DEBUG_SPEC = "all,-efidisk,-lexer,-scripting,-verify"
-_GRUB_DEBUG_FILE = "grub-debug.txt"
 
 _KILL_BY_SIGNAL = 128
 
@@ -137,7 +136,7 @@ def _make_grub_cfg_load_our_theme(
     if save_grub_debug:
         prolog_chunks.append("set debug=%s" % _GRUB_DEBUG_SPEC)
         prolog_chunks.append(
-            # COM1: QEMU attaches -serial file:... for --save-grub-debug captures
+            # COM1: QEMU attaches -serial file:... when --grub-debug-file PATH is given
             "serial --unit=0 --speed=115200 --word=8 --parity=no --stop=1",
         )
 
@@ -416,17 +415,21 @@ def parse_command_line(argv):
         " shows up a GRUB shell, successfully.",
     )
     debugging.add_argument(
-        "--save-grub-debug",
-        dest="save_grub_debug",
-        default=False,
-        action="store_true",
+        "--grub-debug-file",
+        dest="grub_debug_file",
+        default=None,
+        metavar="PATH",
         help=(
-            f"QEMU `-serial file` writes guest COM1 to {_GRUB_DEBUG_FILE} (cwd, truncated each "
-            f"run); grub.cfg gains set debug={_GRUB_DEBUG_SPEC} and terminals that mirror to serial."
+            "QEMU `-serial file:PATH` writes guest COM1 to PATH "
+            "(file is truncated each run); generated grub.cfg adds "
+            f"set debug={_GRUB_DEBUG_SPEC} plus serial/mirroring directives."
         ),
     )
 
     options = parser.parse_args(argv[1:])
+
+    if options.grub_debug_file is not None:
+        options.grub_debug_file = os.path.abspath(options.grub_debug_file)
 
     if options.qemu is None:
         import platform
@@ -540,10 +543,7 @@ def _inner_main(options):
     else:
         font_files_to_load = list(iterate_pf2_files_relative(normalized_source))
 
-    if options.save_grub_debug:
-        guest_serial_capture_path = os.path.abspath(os.path.join(os.getcwd(), _GRUB_DEBUG_FILE))
-    else:
-        guest_serial_capture_path = None
+    guest_serial_capture_path = options.grub_debug_file
 
     abs_grub_cfg_or_none = options.grub_cfg and os.path.abspath(options.grub_cfg)
     grub_cfg_content = _make_final_grub_cfg_content(
@@ -552,7 +552,7 @@ def _inner_main(options):
         options.resolution,
         font_files_to_load,
         options.timeout_seconds,
-        options.save_grub_debug,
+        guest_serial_capture_path is not None,
     )
     if options.debug:
         _dump_grub_cfg_content(grub_cfg_content, target=sys.stderr)
