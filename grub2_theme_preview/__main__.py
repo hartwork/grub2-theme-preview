@@ -521,6 +521,20 @@ def _require_recursive_read_access_at(abs_path):
                 raise OSError(errno.EACCES, "Permission denied: '%s'" % abs_path)
 
 
+def truncate_grub_debug_file(abs_path):
+    try:
+        with open(abs_path, "wb"):
+            pass
+    except OSError as e:
+        raise OSError(
+            e.errno,
+            (
+                "Cannot create or truncate grub serial capture "
+                f"'{abs_path}': {e}"
+            ),
+        )
+
+
 def _inner_main(options):
     for command, package in (
         (options.grub2_mkrescue, "Grub 2.x"),
@@ -659,20 +673,12 @@ def _inner_main(options):
                     run_command += ["-vga", options.qemu_vga]
                 if options.qemu_full_screen:
                     run_command.append("-full-screen")
-                if guest_serial_capture_path is not None:
-                    try:
-                        with open(guest_serial_capture_path, "wb"):
-                            pass
-                    except OSError as e:
-                        raise OSError(
-                            e.errno,
-                            (
-                                "Cannot create or truncate grub serial capture "
-                                f"'{guest_serial_capture_path}': {e}"
-                            ),
-                        )
 
+                if guest_serial_capture_path is not None:
+                    # Truncate any previous output so each run writes a fresh log
+                    truncate_grub_debug_file(guest_serial_capture_path)
                     run_command.extend(["-serial", f"file:{guest_serial_capture_path}"])
+
                 if is_efi_host:
                     run_command += [
                         "-drive",
