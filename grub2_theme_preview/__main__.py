@@ -421,9 +421,8 @@ def parse_command_line(argv):
         default=False,
         action="store_true",
         help=(
-            "QEMU `-serial file` writes guest COM1 to %s (cwd, truncated each "
-            "run); grub.cfg gains set debug=%s and terminals that mirror to serial."
-            % (_GRUB_DEBUG_FILE, _GRUB_DEBUG_SPEC)
+            f"QEMU `-serial file` writes guest COM1 to {_GRUB_DEBUG_FILE} (cwd, truncated each "
+            f"run); grub.cfg gains set debug={_GRUB_DEBUG_SPEC} and terminals that mirror to serial."
         ),
     )
 
@@ -688,8 +687,7 @@ def _inner_main(options):
                     raise RuntimeError(f"QEMU exited with code {qemu_exit_code}.")
                 if guest_serial_capture_path is not None:
                     print(
-                        'INFO: Wrote the virtual machine's serial log (with the GRUB debug output) to file "%s".'
-                        % guest_serial_capture_path
+                        f'INFO: Wrote the virtual machine\'s serial log (with the GRUB debug output) to file "{guest_serial_capture_path}".'
                     )
             finally:
                 with contextlib.suppress(OSError):
