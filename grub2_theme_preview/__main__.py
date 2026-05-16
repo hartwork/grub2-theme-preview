@@ -134,9 +134,9 @@ def _make_grub_cfg_load_our_theme(
 ):
     prolog_chunks = []
     if save_grub_debug:
-        # GRUB-side debug log mirrored to a file.
+        # With --grub-debug-file: GRUB emits debug on COM1; QEMU -serial file:PATH stores it on the host.
         prolog_chunks.append(f"set debug={_GRUB_DEBUG_SPEC}")
-        prolog_chunks.append("serial")
+        prolog_chunks.append("serial --unit=0")
 
     # NOTE: The last font loaded becomes the default/fallback font
     #       So if we load fonts first, the remaining default font
