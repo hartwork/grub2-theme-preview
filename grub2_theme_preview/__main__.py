@@ -420,7 +420,8 @@ def parse_command_line(argv):
         help=(
             "QEMU `-serial file:PATH` writes the virtual machine's COM1 to PATH "
             "(file is truncated each run); generated grub.cfg adds "
-            f"set debug={_GRUB_DEBUG_SPEC} plus serial/mirroring directives."
+            f"set debug={_GRUB_DEBUG_SPEC} plus serial/mirroring directives. "
+            "Breaks normal preview operation, only use for debugging GRUB itself."
         ),
     )
 
