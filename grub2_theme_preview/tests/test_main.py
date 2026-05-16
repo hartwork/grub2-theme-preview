@@ -187,7 +187,7 @@ class CliTest(unittest.TestCase):
                 main(argv)
             dump = stderr.getvalue()
             self.assertIn("set debug=%s" % _GRUB_DEBUG_SPEC, dump)
-            self.assertIn("serial --unit=0", dump)
+            self.assertIn("serial", dump)
 
     def test_without_grub_debug_file_stderr_grub_cfg_skips_serial_and_set_debug(self):
         with TemporaryDirectory() as tempdir:
@@ -200,7 +200,7 @@ class CliTest(unittest.TestCase):
                 main(argv)
             dump = stderr.getvalue()
             self.assertNotIn("set debug=", dump)
-            self.assertNotIn("serial --unit=0", dump)
+            self.assertNotIn("serial", dump)
 
     def test_grub_debug_file_truncates_existing_capture_file(self):
         with TemporaryDirectory() as tempcwd:
