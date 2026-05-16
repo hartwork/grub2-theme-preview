@@ -527,10 +527,7 @@ def truncate_grub_debug_file(abs_path):
     except OSError as e:
         raise OSError(
             e.errno,
-            (
-                "Cannot create or truncate grub serial capture "
-                f"'{abs_path}': {e}"
-            ),
+            (f"Cannot create or truncate grub serial capture '{abs_path}': {e}"),
         )
 
 
@@ -692,7 +689,8 @@ def _inner_main(options):
                     raise RuntimeError(f"QEMU exited with code {qemu_exit_code}.")
                 if vm_serial_capture_path is not None:
                     print(
-                        f'INFO: Wrote the virtual machine\'s serial log (with the GRUB debug output) to file "{vm_serial_capture_path}".'
+                        f"INFO: Wrote the virtual machine's serial log "
+                        f'(with the GRUB debug output) to file "{vm_serial_capture_path}".'
                     )
             finally:
                 with contextlib.suppress(OSError):
