@@ -134,7 +134,8 @@ def _make_grub_cfg_load_our_theme(
 ):
     prolog_chunks = []
     if save_grub_debug:
-        # With --grub-debug-file: GRUB emits debug on COM1; QEMU -serial file:PATH stores it on the host.
+        # When --grub-debug-file is set: GRUB uses COM1 for debug.
+        # QEMU -serial file records that stream to the given path.
         prolog_chunks.append(f"set debug={_GRUB_DEBUG_SPEC}")
         prolog_chunks.append("serial --unit=0")
 
