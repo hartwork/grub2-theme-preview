@@ -420,7 +420,7 @@ def parse_command_line(argv):
         default=None,
         metavar="PATH",
         help=(
-            "QEMU `-serial file:PATH` writes guest COM1 to PATH "
+            "QEMU `-serial file:PATH` writes the virtual machine's COM1 to PATH "
             "(file is truncated each run); generated grub.cfg adds "
             f"set debug={_GRUB_DEBUG_SPEC} plus serial/mirroring directives."
         ),
@@ -557,7 +557,7 @@ def _inner_main(options):
     else:
         font_files_to_load = list(iterate_pf2_files_relative(normalized_source))
 
-    guest_serial_capture_path = options.grub_debug_file
+    vm_serial_capture_path = options.grub_debug_file
 
     abs_grub_cfg_or_none = options.grub_cfg and os.path.abspath(options.grub_cfg)
     grub_cfg_content = _make_final_grub_cfg_content(
@@ -566,7 +566,7 @@ def _inner_main(options):
         options.resolution,
         font_files_to_load,
         options.timeout_seconds,
-        guest_serial_capture_path is not None,
+        vm_serial_capture_path is not None,
     )
     if options.debug:
         _dump_grub_cfg_content(grub_cfg_content, target=sys.stderr)
@@ -674,10 +674,10 @@ def _inner_main(options):
                 if options.qemu_full_screen:
                     run_command.append("-full-screen")
 
-                if guest_serial_capture_path is not None:
+                if vm_serial_capture_path is not None:
                     # Truncate any previous output so each run writes a fresh log
-                    truncate_grub_debug_file(guest_serial_capture_path)
-                    run_command.extend(["-serial", f"file:{guest_serial_capture_path}"])
+                    truncate_grub_debug_file(vm_serial_capture_path)
+                    run_command.extend(["-serial", f"file:{vm_serial_capture_path}"])
 
                 if is_efi_host:
                     run_command += [
@@ -691,9 +691,9 @@ def _inner_main(options):
 
                 if qemu_exit_code not in (0, _KILL_BY_SIGNAL + signal.SIGINT):
                     raise RuntimeError(f"QEMU exited with code {qemu_exit_code}.")
-                if guest_serial_capture_path is not None:
+                if vm_serial_capture_path is not None:
                     print(
-                        f'INFO: Wrote the virtual machine\'s serial log (with the GRUB debug output) to file "{guest_serial_capture_path}".'
+                        f'INFO: Wrote the virtual machine\'s serial log (with the GRUB debug output) to file "{vm_serial_capture_path}".'
                     )
             finally:
                 with contextlib.suppress(OSError):
