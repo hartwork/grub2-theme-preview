@@ -130,7 +130,7 @@ def _make_grub_cfg_load_our_theme(
     resolution_or_none,
     font_files_to_load,
     timeout_seconds,
-    save_grub_debug=False,
+    save_grub_debug,
 ):
     prolog_chunks = []
     if save_grub_debug:
