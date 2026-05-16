@@ -215,7 +215,7 @@ def _make_final_grub_cfg_content(
     resolution_or_none,
     font_files_to_load,
     timeout_seconds,
-    save_grub_debug=False,
+    save_grub_debug,
 ):
     if source_grub_cfg is not None:
         files_to_try_to_read = [source_grub_cfg]
