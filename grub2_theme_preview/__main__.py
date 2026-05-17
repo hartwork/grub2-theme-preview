@@ -528,7 +528,7 @@ def truncate_grub_debug_file(abs_path):
     except OSError as e:
         raise OSError(
             e.errno,
-            (f"Cannot create or truncate grub serial capture '{abs_path}': {e}"),
+            f"Cannot create or truncate grub serial capture '{abs_path}': {e}",
         )
 
 
