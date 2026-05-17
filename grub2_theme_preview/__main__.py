@@ -672,7 +672,7 @@ def _inner_main(options):
                 if options.qemu_full_screen:
                     run_command.append("-full-screen")
 
-                if vm_serial_capture_path is not None:
+                if serial_grub_debug:
                     # Truncate any previous output so each run writes a fresh log
                     truncate_grub_debug_file(vm_serial_capture_path)
                     run_command.extend(["-serial", f"file:{vm_serial_capture_path}"])
@@ -687,7 +687,7 @@ def _inner_main(options):
 
                 qemu_exit_code = _run(run_command, options.verbose)
 
-                if vm_serial_capture_path is not None:
+                if serial_grub_debug:
                     print(
                         f"INFO: Wrote the virtual machine's serial log "
                         f'(with the GRUB debug output) to file "{vm_serial_capture_path}".'
