@@ -130,10 +130,10 @@ def _make_grub_cfg_load_our_theme(
     resolution_or_none,
     font_files_to_load,
     timeout_seconds,
-    save_grub_debug,
+    serial_grub_debug,
 ):
     prolog_chunks = []
-    if save_grub_debug:
+    if serial_grub_debug:
         # When --grub-debug-file is set: GRUB uses COM1 for debug.
         # QEMU -serial file records that stream to the given path.
         prolog_chunks.append(f"set debug={_GRUB_DEBUG_SPEC}")
@@ -156,7 +156,7 @@ def _make_grub_cfg_load_our_theme(
     ]
 
     terminal_output_line = "terminal_output gfxterm"
-    if save_grub_debug:
+    if serial_grub_debug:
         terminal_output_line += " serial"
 
     if resolution_or_none is not None:
@@ -208,7 +208,7 @@ def _make_final_grub_cfg_content(
     resolution_or_none,
     font_files_to_load,
     timeout_seconds,
-    save_grub_debug,
+    serial_grub_debug,
 ):
     if source_grub_cfg is not None:
         files_to_try_to_read = [source_grub_cfg]
@@ -252,7 +252,7 @@ def _make_final_grub_cfg_content(
         resolution_or_none,
         font_files_to_load,
         timeout_seconds,
-        save_grub_debug,
+        serial_grub_debug,
     )
 
 
@@ -555,6 +555,7 @@ def _inner_main(options):
         font_files_to_load = list(iterate_pf2_files_relative(normalized_source))
 
     vm_serial_capture_path = options.grub_debug_file
+    serial_grub_debug = vm_serial_capture_path is not None
 
     abs_grub_cfg_or_none = options.grub_cfg and os.path.abspath(options.grub_cfg)
     grub_cfg_content = _make_final_grub_cfg_content(
@@ -563,7 +564,7 @@ def _inner_main(options):
         options.resolution,
         font_files_to_load,
         options.timeout_seconds,
-        vm_serial_capture_path is not None,
+        serial_grub_debug,
     )
     if options.debug:
         _dump_grub_cfg_content(grub_cfg_content, target=sys.stderr)
