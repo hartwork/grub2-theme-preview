@@ -134,10 +134,10 @@ def _make_grub_cfg_load_our_theme(
 ):
     prolog_chunks = []
     if serial_grub_debug:
-        # When --grub-debug-file is set: GRUB uses COM1 for debug.
-        # QEMU -serial file records that stream to the given path.
+        # Adding debug to GRUB's config emits it on serial and QEMU -serial file records COM1.
+        # See https://www.gnu.org/software/grub/manual/grub/html_node/serial.html
         prolog_chunks.append(f"set debug={_GRUB_DEBUG_SPEC}")
-        prolog_chunks.append("serial --unit=0")
+        prolog_chunks.append("serial")
 
     # NOTE: The last font loaded becomes the default/fallback font
     #       So if we load fonts first, the remaining default font
