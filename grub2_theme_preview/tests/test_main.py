@@ -187,8 +187,7 @@ class CliTest(unittest.TestCase):
                 main(argv)
             dump = stderr.getvalue()
             self.assertIn(
-                f"set debug={_GRUB_DEBUG_SPEC}\n"
-                "serial\n",
+                f"set debug={_GRUB_DEBUG_SPEC}\nserial\n",
                 dump,
             )
             self.assertIn("terminal_output gfxterm serial", dump)
