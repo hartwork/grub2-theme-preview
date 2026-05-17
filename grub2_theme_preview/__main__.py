@@ -687,13 +687,14 @@ def _inner_main(options):
 
                 qemu_exit_code = _run(run_command, options.verbose)
 
-                if qemu_exit_code not in (0, _KILL_BY_SIGNAL + signal.SIGINT):
-                    raise RuntimeError(f"QEMU exited with code {qemu_exit_code}.")
                 if vm_serial_capture_path is not None:
                     print(
                         f"INFO: Wrote the virtual machine's serial log "
                         f'(with the GRUB debug output) to file "{vm_serial_capture_path}".'
                     )
+
+                if qemu_exit_code not in (0, _KILL_BY_SIGNAL + signal.SIGINT):
+                    raise RuntimeError(f"QEMU exited with code {qemu_exit_code}.")
             finally:
                 with contextlib.suppress(OSError):
                     os.remove(abs_tmp_img_file)
