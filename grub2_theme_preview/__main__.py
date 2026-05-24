@@ -416,7 +416,6 @@ def parse_command_line(argv):
     debugging.add_argument(
         "--grub-debug-file",
         dest="grub_debug_file",
-        default=None,
         metavar="PATH",
         help=(
             "QEMU `-serial file:PATH` writes the virtual machine's COM1 to PATH "
