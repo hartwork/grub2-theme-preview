@@ -101,7 +101,7 @@ class CliTest(unittest.TestCase):
             (
                 "without --grub-debug-file qemu serial backend",
                 ["--verbose"],
-                "file:",
+                "-serial",
                 False,
             ),
         ]
