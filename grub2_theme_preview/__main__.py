@@ -23,6 +23,7 @@ _PATH_IMAGE_ONLY_PNG = "themes/DEMO.png"
 _PATH_IMAGE_ONLY_TGA = "themes/DEMO.tga"
 _PATH_IMAGE_ONLY_JPEG = "themes/DEMO.jpeg"
 _PATH_FULL_THEME = "themes/DEMO"
+_GRUB_DEBUG_SPEC = "all,-efidisk,-lexer,-scripting,-verify"
 
 _KILL_BY_SIGNAL = 128
 
@@ -101,25 +102,47 @@ def _generate_dummy_menu_entries():
             reboot
         }
 
+        menuentry 'FreeBSD' --class freebsd --class bsd --class os {
+            reboot
+        }
+
         menuentry 'Gentoo' --class gentoo --class gnu-linux --class linux --class gnu --class os {
             reboot
         }
 
-        menuentry "Memtest86+" --class memtest {
+        menuentry 'macOS' --class macos --class darwin --class os {
+            reboot
+        }
+
+        menuentry 'Memtest86+' --class memtest {
+            reboot
+        }
+
+        menuentry 'Windows' --class windows --class os {
             reboot
         }
     """)
 
 
 def _make_grub_cfg_load_our_theme(
-    grub_cfg_content, source_type, resolution_or_none, font_files_to_load, timeout_seconds
+    grub_cfg_content,
+    source_type,
+    resolution_or_none,
+    font_files_to_load,
+    timeout_seconds,
+    serial_grub_debug,
 ):
+    prolog_chunks = []
+    if serial_grub_debug:
+        # Adding debug to GRUB's config emits it on serial and QEMU -serial file records COM1.
+        # See https://www.gnu.org/software/grub/manual/grub/html_node/serial.html
+        prolog_chunks.append(f"set debug={_GRUB_DEBUG_SPEC}")
+        prolog_chunks.append("serial")
+
     # NOTE: The last font loaded becomes the default/fallback font
     #       So if we load fonts first, the remaining default font
     #       will remain unchanged and the theme will display unchanged.
-    prolog_chunks = [
-        "loadfont $prefix/fonts/unicode.pf2",
-    ]
+    prolog_chunks.append("loadfont $prefix/fonts/unicode.pf2")
 
     for relative_path in font_files_to_load:
         prolog_chunks.append(f"loadfont $prefix/{_PATH_FULL_THEME}/{relative_path}")
@@ -132,11 +155,15 @@ def _make_grub_cfg_load_our_theme(
         "insmod jpeg",
     ]
 
+    terminal_output_line = "terminal_output gfxterm"
+    if serial_grub_debug:
+        terminal_output_line += " serial"
+
     if resolution_or_none is not None:
         # We need to be the first call to 'terminal_output gfxterm'
         # if we want to have a say with resolution
         prolog_chunks.append("set gfxmode=%dx%d" % resolution_or_none)
-        prolog_chunks.append("terminal_output gfxterm")
+        prolog_chunks.append(terminal_output_line)
 
     prolog_chunks.append("")  # blank line
     prolog_chunks.append("")  # trailing new line
@@ -156,7 +183,7 @@ def _make_grub_cfg_load_our_theme(
     if resolution_or_none is None:
         # If we haven't ensured GFX mode earlier, do it now
         # so it's done at least once
-        epilog_chunks.append("terminal_output gfxterm")
+        epilog_chunks.append(terminal_output_line)
 
     if source_type == _SourceType.DIRECTORY:
         epilog_chunks.append("set theme=$prefix/%s/theme.txt" % _PATH_FULL_THEME)
@@ -176,7 +203,12 @@ def _make_grub_cfg_load_our_theme(
 
 
 def _make_final_grub_cfg_content(
-    source_type, source_grub_cfg, resolution_or_none, font_files_to_load, timeout_seconds
+    source_type,
+    source_grub_cfg,
+    resolution_or_none,
+    font_files_to_load,
+    timeout_seconds,
+    serial_grub_debug,
 ):
     if source_grub_cfg is not None:
         files_to_try_to_read = [source_grub_cfg]
@@ -215,7 +247,12 @@ def _make_final_grub_cfg_content(
         content = _generate_dummy_menu_entries()
 
     return _make_grub_cfg_load_our_theme(
-        content, source_type, resolution_or_none, font_files_to_load, timeout_seconds
+        content,
+        source_type,
+        resolution_or_none,
+        font_files_to_load,
+        timeout_seconds,
+        serial_grub_debug,
     )
 
 
@@ -376,8 +413,21 @@ def parse_command_line(argv):
         "useful for checking if a plain GRUB rescue image"
         " shows up a GRUB shell, successfully.",
     )
+    debugging.add_argument(
+        "--grub-debug-file",
+        metavar="PATH",
+        help=(
+            "QEMU `-serial file:PATH` writes the virtual machine's COM1 to PATH "
+            "(file is truncated each run); generated grub.cfg adds "
+            f"set debug={_GRUB_DEBUG_SPEC} plus serial/mirroring directives. "
+            "Breaks normal preview operation, only use for debugging GRUB itself."
+        ),
+    )
 
     options = parser.parse_args(argv[1:])
+
+    if options.grub_debug_file is not None:
+        options.grub_debug_file = os.path.abspath(options.grub_debug_file)
 
     if options.qemu is None:
         import platform
@@ -469,6 +519,17 @@ def _require_recursive_read_access_at(abs_path):
                 raise OSError(errno.EACCES, "Permission denied: '%s'" % abs_path)
 
 
+def truncate_grub_debug_file(abs_path):
+    try:
+        with open(abs_path, "wb"):
+            pass
+    except OSError as e:
+        raise OSError(
+            e.errno,
+            f"Cannot create or truncate grub serial capture '{abs_path}': {e}",
+        )
+
+
 def _inner_main(options):
     for command, package in (
         (options.grub2_mkrescue, "Grub 2.x"),
@@ -491,6 +552,9 @@ def _inner_main(options):
     else:
         font_files_to_load = list(iterate_pf2_files_relative(normalized_source))
 
+    vm_serial_capture_path = options.grub_debug_file
+    serial_grub_debug = vm_serial_capture_path is not None
+
     abs_grub_cfg_or_none = options.grub_cfg and os.path.abspath(options.grub_cfg)
     grub_cfg_content = _make_final_grub_cfg_content(
         source_type,
@@ -498,6 +562,7 @@ def _inner_main(options):
         options.resolution,
         font_files_to_load,
         options.timeout_seconds,
+        serial_grub_debug,
     )
     if options.debug:
         _dump_grub_cfg_content(grub_cfg_content, target=sys.stderr)
@@ -604,6 +669,12 @@ def _inner_main(options):
                     run_command += ["-vga", options.qemu_vga]
                 if options.qemu_full_screen:
                     run_command.append("-full-screen")
+
+                if serial_grub_debug:
+                    # Truncate any previous output so each run writes a fresh log
+                    truncate_grub_debug_file(vm_serial_capture_path)
+                    run_command.extend(["-serial", f"file:{vm_serial_capture_path}"])
+
                 if is_efi_host:
                     run_command += [
                         "-drive",
@@ -613,6 +684,12 @@ def _inner_main(options):
                 print("INFO: Please give GRUB a moment to show up in QEMU...")
 
                 qemu_exit_code = _run(run_command, options.verbose)
+
+                if serial_grub_debug:
+                    print(
+                        f"INFO: Wrote the virtual machine's serial log "
+                        f'(with the GRUB debug output) to file "{vm_serial_capture_path}".'
+                    )
 
                 if qemu_exit_code not in (0, _KILL_BY_SIGNAL + signal.SIGINT):
                     raise RuntimeError(f"QEMU exited with code {qemu_exit_code}.")
