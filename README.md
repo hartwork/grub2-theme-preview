@@ -62,7 +62,7 @@ usage: grub2-theme-preview [-h] [--grub-cfg PATH] [--verbose]
                            [--grub2-mkrescue COMMAND] [--qemu COMMAND]
                            [--xorriso COMMAND] [--display DISPLAY]
                            [--full-screen] [--no-kvm] [--vga CARD] [--debug]
-                           [--plain-rescue-image]
+                           [--plain-rescue-image] [--grub-debug-file PATH]
                            PATH
 
 Preview a GRUB 2.x theme using KVM/QEMU
@@ -106,6 +106,13 @@ debugging arguments:
   --plain-rescue-image  use unprocessed GRUB rescue image with no theme
                         patched in; useful for checking if a plain GRUB rescue
                         image shows up a GRUB shell, successfully.
+  --grub-debug-file PATH
+                        QEMU `-serial file:PATH` writes the virtual machine's
+                        COM1 to PATH (file is truncated each run); generated
+                        grub.cfg adds set
+                        debug=all,-efidisk,-lexer,-scripting,-verify plus
+                        serial/mirroring directives. Breaks normal preview
+                        operation, only use for debugging GRUB itself.
 
 environment variables:
   G2TP_GRUB_LIB         Path of GRUB platform files parent directory
