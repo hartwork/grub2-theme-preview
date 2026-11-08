@@ -32,6 +32,7 @@ that image in a virtual machine using KVM/QEMU, all without root privileges.
 
 ## Installation
 
+### PyPI
 To install the latest release from [PyPI](https://pypi.org/):
 
 ```console
@@ -51,6 +52,15 @@ Please make sure to install these _non-PyPI dependencies_ as well:
  - [mtools](https://www.gnu.org/software/mtools/) — _collection of utilities to access MS-DOS_
  - `xorriso` of [libisoburn](https://dev.lovelyhq.com/libburnia/libisoburn) — _frontend which enables creation and expansion of the ISO format_
 
+### Fedora Linux and Derivatives via [Terra](https://terrapkg.com/)
+
+```console
+# First, enable the Terra Repository
+sudo dnf install --nogpgcheck --repofrompath 'terra,https://repos.fyralabs.com/terra$releasever' terra-release
+
+# Then, install with dnf
+sudo dnf install grub2-theme-preview
+```
 
 ## Usage
 
