@@ -545,6 +545,12 @@ def _inner_main(options):
 
     normalized_source = os.path.normpath(os.path.abspath(options.source))
 
+    if not os.path.exists(normalized_source):
+        raise OSError(
+            errno.ENOENT,
+            "Theme source path %r does not exist" % normalized_source,
+        )
+
     source_type = _classify_source(options.source)
 
     if source_type != _SourceType.DIRECTORY:

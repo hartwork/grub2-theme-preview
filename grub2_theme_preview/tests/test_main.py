@@ -11,7 +11,7 @@ from unittest.mock import patch
 
 from parameterized import parameterized
 
-from ..__main__ import _GRUB_DEBUG_SPEC, main
+from ..__main__ import _GRUB_DEBUG_SPEC, _inner_main, main, parse_command_line
 
 
 @contextmanager
@@ -238,6 +238,37 @@ class CliTest(unittest.TestCase):
             self.assertTrue(os.path.isfile(capture))
             with open(capture, "rb") as f:
                 self.assertEqual(f.read(), b"")
+
+    def test_missing_theme_source_fails_early_with_clean_error(self):
+        with TemporaryDirectory() as tempdir:
+            missing_source = os.path.join(tempdir, "does-not-exist")
+            options = parse_command_line([None, "--qemu", "true", missing_source])
+            with (
+                patch(
+                    "grub2_theme_preview.__main__.which",
+                    return_value="/usr/bin/true",
+                ),
+                self.assertRaises(OSError) as caught,
+            ):
+                _inner_main(options)
+
+        message = str(caught.exception)
+        self.assertIn("does-not-exist", message)
+        self.assertIn("does not exist", message)
+
+    def test_existing_theme_source_passes_existence_check(self):
+        with TemporaryDirectory() as tempdir:
+            options = parse_command_line([None, "--qemu", "true", tempdir])
+            with (
+                patch(
+                    "grub2_theme_preview.__main__.which",
+                    return_value="/usr/bin/true",
+                ),
+                self.assertRaises(OSError) as caught,
+            ):
+                _inner_main(options)
+
+        self.assertNotIn("does not exist", str(caught.exception))
 
     @parameterized.expand(
         [
