@@ -35,7 +35,9 @@ jobs:
           source venv/bin/activate
           pip3 install -r requirements.txt
           pip3 check
-          diff -u0 <(pip3 freeze | sed 's,_,-,g' | sort -f) <(sed -e '/^#/d' -e '/^$/d' requirements.txt | sort -f)
+          diff -u0 \
+              <(sed -e '/^#/d' -e '/^$/d' requirements.txt | sort -f) \
+              <(pip3 freeze | sed 's,_,-,g' | sort -f)
 
       - name: Run Python test suite
         run: |-
