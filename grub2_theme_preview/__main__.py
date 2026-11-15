@@ -531,6 +531,11 @@ def truncate_grub_debug_file(abs_path):
 
 
 def _inner_main(options):
+    normalized_source = os.path.normpath(os.path.abspath(options.source))
+
+    if not os.path.exists(normalized_source):
+        raise FileNotFoundError(f"Path {normalized_source!r} does not exist.")
+
     for command, package in (
         (options.grub2_mkrescue, "Grub 2.x"),
         ("mcopy", "mtools"),  # see issue #8
@@ -542,8 +547,6 @@ def _inner_main(options):
             which(command)
         except OSError:
             raise _CommandNotFoundException(command, package)
-
-    normalized_source = os.path.normpath(os.path.abspath(options.source))
 
     source_type = _classify_source(options.source)
 
